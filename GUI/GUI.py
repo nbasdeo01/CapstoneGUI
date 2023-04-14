@@ -246,7 +246,7 @@ class CashRegisterApp(tk.Tk):
         # Item listbox
         self.item_listbox = tk.Listbox(self.admin_page, font=("Open Sans", 16), height=10, width=30)
         self.item_listbox.grid(row=1, column=0, padx=10, pady=10)
-        #self.populate_item_listbox()
+        self.populate_item_listbox()
 
         # Add item button
         self.add_item_button = tk.Button(self.admin_page, text="Add Item", font=("Open Sans", 16), command=self.add_item)
@@ -278,10 +278,10 @@ class CashRegisterApp(tk.Tk):
         self.logout_button_admin = tk.Button(self.admin_page, text="Logout", font=("Open Sans", 16), command=self.back_to_passcode_page)
         self.logout_button_admin.grid(row=4, column=1, padx=10, pady=10)
         
-    #def populate_item_listbox(self):
-        #self.item_listbox.delete(0, tk.END)
-        #for item_name, item_price in self.items:
-           # self.item_listbox.insert(tk.END, f"{item_name} - ${item_price:.2f}")
+    def populate_item_listbox(self):
+        self.item_listbox.delete(0, tk.END)
+        for item_name, item_price in self.items:
+            self.item_listbox.insert(tk.END, f"{item_name} - ${item_price:.2f}")
 
     def add_item(self):
         item_name = self.new_item_name_entry.get()
