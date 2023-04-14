@@ -2,6 +2,7 @@ import tkinter as tk
 import pyttsx3
 from tkinter import ttk
 from PIL import Image, ImageTk
+import checkout_process
 
 class CashRegister(tk.Frame):
     
