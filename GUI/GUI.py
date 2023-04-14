@@ -45,9 +45,9 @@ class CashRegisterApp(tk.Tk):
     def create_cash_register_page(self):
         self.cash_register_page = tk.Frame(self, bg="#F5F5F5")
         self.cash_register_page.grid(row=0, column=0, sticky="nsew")
-        water_image = ImageTk.PhotoImage(Image.open("GUI\item1.png").resize((150, 150)))
-        chips_image = ImageTk.PhotoImage(Image.open("GUI\item2.png").resize((150, 150)))
-        soda_image = ImageTk.PhotoImage(Image.open("GUI\item3.png").resize((150, 150)))
+        water_image = ImageTk.PhotoImage(Image.open("GUI/item1.png").resize((150, 150)))
+        chips_image = ImageTk.PhotoImage(Image.open("GUI/item2.png").resize((150, 150)))
+        soda_image = ImageTk.PhotoImage(Image.open("GUI/item3.png").resize((150, 150)))
 
         # Create a list of items with their respective prices
         items = [
