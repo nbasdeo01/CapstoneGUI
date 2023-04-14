@@ -1,0 +1,126 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2708
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fnil\fcharset0 Menlo-Regular;}
+{\colortbl;\red255\green255\blue255;\red19\green19\blue19;\red255\green255\blue255;\red183\green111\blue179;
+\red203\green203\blue202;\red67\green192\blue160;\red71\green138\blue206;\red212\green213\blue153;\red141\green213\blue254;
+\red194\green125\blue100;\red88\green137\blue67;\red167\green197\blue151;}
+{\*\expandedcolortbl;;\cssrgb\c9821\c9821\c9821;\cssrgb\c100000\c100000\c99985\c0;\cssrgb\c77407\c52698\c75306;
+\cssrgb\c83320\c83320\c83112;\cssrgb\c30631\c78929\c69023;\cssrgb\c34145\c61677\c84338;\cssrgb\c86247\c86216\c66392;\cssrgb\c61544\c86705\c99884;
+\cssrgb\c80772\c56796\c46790;\cssrgb\c41481\c59899\c33082;\cssrgb\c71034\c80830\c65726;}
+\margl1440\margr1440\vieww29200\viewh15640\viewkind0
+\deftab720
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs24 \cf2 \cb3 \expnd0\expndtw0\kerning0
+import\cf2 \cb3  \cf2 \cb3 tkinter\cf2 \cb3  \cf2 \cb3 as\cf2 \cb3  \cf2 \cb3 tk\cf2 \cb3 \
+\cf2 \cb3 from\cf2 \cb3  \cf2 \cb3 tkinter\cf2 \cb3  \cf2 \cb3 import\cf2 \cb3  \cf2 \cb3 ttk\cf2 \cb3 \
+\cf2 \cb3 from\cf2 \cb3  \cf2 \cb3 PIL\cf2 \cb3  \cf2 \cb3 import\cf2 \cb3  \cf2 \cb3 Image\cf2 \cb3 , \cf2 \cb3 ImageTk\cf2 \cb3 \
+\cf2 \cb3 import\cf2 \cb3  \cf2 \cb3 tkinter\cf2 \cb3 .\cf2 \cb3 messagebox\cf2 \cb3 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb3 class\cf2 \cb3  \cf2 \cb3 CashRegisterGUI\cf2 \cb3 (\cf2 \cb3 tk\cf2 \cb3 .\cf2 \cb3 Frame\cf2 \cb3 ):\
+    \
+    \cf2 \cb3 def\cf2 \cb3  \cf2 \cb3 __init__\cf2 \cb3 (\cf2 \cb3 self\cf2 \cb3 , \cf2 \cb3 master\cf2 \cb3 =\cf2 \cb3 None\cf2 \cb3 ):\
+        \cf2 \cb3 super\cf2 \cb3 ().\cf2 \cb3 __init__\cf2 \cb3 (\cf2 \cb3 master\cf2 \cb3 )\
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 master\cf2 \cb3  = \cf2 \cb3 master\cf2 \cb3 \
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 master\cf2 \cb3 .title(\cf2 \cb3 "C4Me Cash Register"\cf2 \cb3 )\
+        \
+        \cf2 \cb3 # create item images\cf2 \cb3 \
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item1_img\cf2 \cb3  = \cf2 \cb3 tk\cf2 \cb3 .\cf2 \cb3 PhotoImage\cf2 \cb3 (\cf2 \cb3 file\cf2 \cb3 =\cf2 \cb3 "item1.png"\cf2 \cb3 )\
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item2_img\cf2 \cb3  = \cf2 \cb3 tk\cf2 \cb3 .\cf2 \cb3 PhotoImage\cf2 \cb3 (\cf2 \cb3 file\cf2 \cb3 =\cf2 \cb3 "item2.png"\cf2 \cb3 )\
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item3_img\cf2 \cb3  = \cf2 \cb3 tk\cf2 \cb3 .\cf2 \cb3 PhotoImage\cf2 \cb3 (\cf2 \cb3 file\cf2 \cb3 =\cf2 \cb3 "item3.png"\cf2 \cb3 )\
+        \
+        \cf2 \cb3 # create item buttons\cf2 \cb3 \
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item1_btn\cf2 \cb3  = \cf2 \cb3 tk\cf2 \cb3 .\cf2 \cb3 Button\cf2 \cb3 (\cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 master\cf2 \cb3 , \cf2 \cb3 image\cf2 \cb3 =\cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item1_img\cf2 \cb3 , \cf2 \cb3 command\cf2 \cb3 =\cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 add_item1\cf2 \cb3 )\
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item2_btn\cf2 \cb3  = \cf2 \cb3 tk\cf2 \cb3 .\cf2 \cb3 Button\cf2 \cb3 (\cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 master\cf2 \cb3 , \cf2 \cb3 image\cf2 \cb3 =\cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item2_img\cf2 \cb3 , \cf2 \cb3 command\cf2 \cb3 =\cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 add_item2\cf2 \cb3 )\
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item3_btn\cf2 \cb3  = \cf2 \cb3 tk\cf2 \cb3 .\cf2 \cb3 Button\cf2 \cb3 (\cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 master\cf2 \cb3 , \cf2 \cb3 image\cf2 \cb3 =\cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item3_img\cf2 \cb3 , \cf2 \cb3 command\cf2 \cb3 =\cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 add_item3\cf2 \cb3 )\
+        \
+        \cf2 \cb3 # create item labels\cf2 \cb3 \
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item1_label\cf2 \cb3  = \cf2 \cb3 tk\cf2 \cb3 .\cf2 \cb3 Label\cf2 \cb3 (\cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 master\cf2 \cb3 , \cf2 \cb3 text\cf2 \cb3 =\cf2 \cb3 "Item 1: $1.99"\cf2 \cb3 )\
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item2_label\cf2 \cb3  = \cf2 \cb3 tk\cf2 \cb3 .\cf2 \cb3 Label\cf2 \cb3 (\cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 master\cf2 \cb3 , \cf2 \cb3 text\cf2 \cb3 =\cf2 \cb3 "Item 2: $2.99"\cf2 \cb3 )\
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item3_label\cf2 \cb3  = \cf2 \cb3 tk\cf2 \cb3 .\cf2 \cb3 Label\cf2 \cb3 (\cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 master\cf2 \cb3 , \cf2 \cb3 text\cf2 \cb3 =\cf2 \cb3 "Item 3: $3.99"\cf2 \cb3 )\
+        \
+        \cf2 \cb3 # create quantity labels\cf2 \cb3 \
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item1_qty\cf2 \cb3  = \cf2 \cb3 tk\cf2 \cb3 .\cf2 \cb3 StringVar\cf2 \cb3 ()\
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item1_qty\cf2 \cb3 .\cf2 \cb3 set\cf2 \cb3 (\cf2 \cb3 "0"\cf2 \cb3 )\
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item2_qty\cf2 \cb3  = \cf2 \cb3 tk\cf2 \cb3 .\cf2 \cb3 StringVar\cf2 \cb3 ()\
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item2_qty\cf2 \cb3 .\cf2 \cb3 set\cf2 \cb3 (\cf2 \cb3 "0"\cf2 \cb3 )\
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item3_qty\cf2 \cb3  = \cf2 \cb3 tk\cf2 \cb3 .\cf2 \cb3 StringVar\cf2 \cb3 ()\
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item3_qty\cf2 \cb3 .\cf2 \cb3 set\cf2 \cb3 (\cf2 \cb3 "0"\cf2 \cb3 )\
+        \
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item1_qty_label\cf2 \cb3  = \cf2 \cb3 tk\cf2 \cb3 .\cf2 \cb3 Label\cf2 \cb3 (\cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 master\cf2 \cb3 , \cf2 \cb3 textvariable\cf2 \cb3 =\cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item1_qty\cf2 \cb3 )\
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item2_qty_label\cf2 \cb3  = \cf2 \cb3 tk\cf2 \cb3 .\cf2 \cb3 Label\cf2 \cb3 (\cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 master\cf2 \cb3 , \cf2 \cb3 textvariable\cf2 \cb3 =\cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item2_qty\cf2 \cb3 )\
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item3_qty_label\cf2 \cb3  = \cf2 \cb3 tk\cf2 \cb3 .\cf2 \cb3 Label\cf2 \cb3 (\cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 master\cf2 \cb3 , \cf2 \cb3 textvariable\cf2 \cb3 =\cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item3_qty\cf2 \cb3 )\
+        \
+        \cf2 \cb3 # create subtotal, tax, and total labels\cf2 \cb3 \
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 subtotal_label\cf2 \cb3  = \cf2 \cb3 tk\cf2 \cb3 .\cf2 \cb3 Label\cf2 \cb3 (\cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 master\cf2 \cb3 , \cf2 \cb3 text\cf2 \cb3 =\cf2 \cb3 "Subtotal: $0.00"\cf2 \cb3 )\
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 tax_label\cf2 \cb3  = \cf2 \cb3 tk\cf2 \cb3 .\cf2 \cb3 Label\cf2 \cb3 (\cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 master\cf2 \cb3 , \cf2 \cb3 text\cf2 \cb3 =\cf2 \cb3 "Tax: $0.00"\cf2 \cb3 )\
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 total_label\cf2 \cb3  = \cf2 \cb3 tk\cf2 \cb3 .\cf2 \cb3 Label\cf2 \cb3 (\cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 master\cf2 \cb3 , \cf2 \cb3 text\cf2 \cb3 =\cf2 \cb3 "Total: $0.00"\cf2 \cb3 )\
+        \
+        \cf2 \cb3 # create clear button\cf2 \cb3 \
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 clear_btn\cf2 \cb3  = \cf2 \cb3 tk\cf2 \cb3 .\cf2 \cb3 Button\cf2 \cb3 (\cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 master\cf2 \cb3 , \cf2 \cb3 text\cf2 \cb3 =\cf2 \cb3 "Clear"\cf2 \cb3 , \cf2 \cb3 command\cf2 \cb3 =\cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 clear_items\cf2 \cb3 )\
+        \
+        \cf2 \cb3 # pack everything\cf2 \cb3 \
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item1_btn\cf2 \cb3 .\cf2 \cb3 pack\cf2 \cb3 (\cf2 \cb3 side\cf2 \cb3 =\cf2 \cb3 tk\cf2 \cb3 .\cf2 \cb3 LEFT\cf2 \cb3 , \cf2 \cb3 padx\cf2 \cb3 =\cf2 \cb3 10\cf2 \cb3 , \cf2 \cb3 pady\cf2 \cb3 =\cf2 \cb3 10\cf2 \cb3 )\
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item2_btn\cf2 \cb3 .\cf2 \cb3 pack\cf2 \cb3 (\cf2 \cb3 side\cf2 \cb3 =\cf2 \cb3 tk\cf2 \cb3 .\cf2 \cb3 LEFT\cf2 \cb3 , \cf2 \cb3 padx\cf2 \cb3 =\cf2 \cb3 10\cf2 \cb3 , \cf2 \cb3 pady\cf2 \cb3 =\cf2 \cb3 10\cf2 \cb3 )\
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item3_btn\cf2 \cb3 .\cf2 \cb3 pack\cf2 \cb3 (\cf2 \cb3 side\cf2 \cb3 =\cf2 \cb3 tk\cf2 \cb3 .\cf2 \cb3 LEFT\cf2 \cb3 , \cf2 \cb3 padx\cf2 \cb3 =\cf2 \cb3 10\cf2 \cb3 , \cf2 \cb3 pady\cf2 \cb3 =\cf2 \cb3 10\cf2 \cb3 )\
+        \
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item1_label\cf2 \cb3 .\cf2 \cb3 pack\cf2 \cb3 ()\
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item2_label\cf2 \cb3 .\cf2 \cb3 pack\cf2 \cb3 ()\
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item3_label\cf2 \cb3 .\cf2 \cb3 pack\cf2 \cb3 ()\
+        \
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item1_qty_label\cf2 \cb3 .\cf2 \cb3 pack\cf2 \cb3 ()\
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item2_qty_label\cf2 \cb3 .\cf2 \cb3 pack\cf2 \cb3 ()\
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item3_qty_label\cf2 \cb3 .\cf2 \cb3 pack\cf2 \cb3 ()\
+        \
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 subtotal_label\cf2 \cb3 .\cf2 \cb3 pack\cf2 \cb3 ()\
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 tax_label\cf2 \cb3 .\cf2 \cb3 pack\cf2 \cb3 ()\
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 total_label\cf2 \cb3 .\cf2 \cb3 pack\cf2 \cb3 ()\
+        \
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 clear_btn\cf2 \cb3 .\cf2 \cb3 pack\cf2 \cb3 (\cf2 \cb3 side\cf2 \cb3 =\cf2 \cb3 tk\cf2 \cb3 .\cf2 \cb3 BOTTOM\cf2 \cb3 , \cf2 \cb3 pady\cf2 \cb3 =\cf2 \cb3 10\cf2 \cb3 )\
+        \
+        \cf2 \cb3 # set initial values\cf2 \cb3 \
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 subtotal\cf2 \cb3  = \cf2 \cb3 0.00\cf2 \cb3 \
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 tax\cf2 \cb3  = \cf2 \cb3 0.00\cf2 \cb3 \
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 total\cf2 \cb3  = \cf2 \cb3 0.00\cf2 \cb3 \
+        \
+    \cf2 \cb3 def\cf2 \cb3  \cf2 \cb3 add_item1\cf2 \cb3 (\cf2 \cb3 self\cf2 \cb3 ):\
+        \cf2 \cb3 qty\cf2 \cb3  = \cf2 \cb3 int\cf2 \cb3 (\cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item1_qty\cf2 \cb3 .\cf2 \cb3 get\cf2 \cb3 ()) + \cf2 \cb3 1\cf2 \cb3 \
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item1_qty\cf2 \cb3 .\cf2 \cb3 set\cf2 \cb3 (\cf2 \cb3 str\cf2 \cb3 (\cf2 \cb3 qty\cf2 \cb3 ))\
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 subtotal\cf2 \cb3  += \cf2 \cb3 1.99\cf2 \cb3 \
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 update_totals\cf2 \cb3 ()\
+        \
+    \cf2 \cb3 def\cf2 \cb3  \cf2 \cb3 add_item2\cf2 \cb3 (\cf2 \cb3 self\cf2 \cb3 ):\
+        \cf2 \cb3 qty\cf2 \cb3  = \cf2 \cb3 int\cf2 \cb3 (\cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item2_qty\cf2 \cb3 .\cf2 \cb3 get\cf2 \cb3 ()) + \cf2 \cb3 1\cf2 \cb3 \
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item2_qty\cf2 \cb3 .\cf2 \cb3 set\cf2 \cb3 (\cf2 \cb3 str\cf2 \cb3 (\cf2 \cb3 qty\cf2 \cb3 ))\
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 subtotal\cf2 \cb3  += \cf2 \cb3 2.99\cf2 \cb3 \
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 update_totals\cf2 \cb3 ()\
+\
+    \cf2 \cb3 def\cf2 \cb3  \cf2 \cb3 add_item3\cf2 \cb3 (\cf2 \cb3 self\cf2 \cb3 ):\
+        \cf2 \cb3 qty\cf2 \cb3  = \cf2 \cb3 int\cf2 \cb3 (\cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item3_qty\cf2 \cb3 .\cf2 \cb3 get\cf2 \cb3 ()) + \cf2 \cb3 1\cf2 \cb3 \
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item3_qty\cf2 \cb3 .\cf2 \cb3 set\cf2 \cb3 (\cf2 \cb3 str\cf2 \cb3 (\cf2 \cb3 qty\cf2 \cb3 ))\
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 subtotal\cf2 \cb3  += \cf2 \cb3 3.99\cf2 \cb3 \
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 update_totals\cf2 \cb3 ()\
+    \
+    \cf2 \cb3 def\cf2 \cb3  \cf2 \cb3 clear_items\cf2 \cb3 (\cf2 \cb3 self\cf2 \cb3 ):\
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item1_qty\cf2 \cb3 .\cf2 \cb3 set\cf2 \cb3 (\cf2 \cb3 "0"\cf2 \cb3 )\
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item2_qty\cf2 \cb3 .\cf2 \cb3 set\cf2 \cb3 (\cf2 \cb3 "0"\cf2 \cb3 )\
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 item3_qty\cf2 \cb3 .\cf2 \cb3 set\cf2 \cb3 (\cf2 \cb3 "0"\cf2 \cb3 )\
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 subtotal\cf2 \cb3  = \cf2 \cb3 0.0\cf2 \cb3 \
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 tax\cf2 \cb3  = \cf2 \cb3 0.0\cf2 \cb3 \
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 total\cf2 \cb3  = \cf2 \cb3 0.0\cf2 \cb3 \
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 update_totals\cf2 \cb3 ()\
+    \
+    \cf2 \cb3 def\cf2 \cb3  \cf2 \cb3 update_totals\cf2 \cb3 (\cf2 \cb3 self\cf2 \cb3 ):\
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 subtotal_label\cf2 \cb3 .\cf2 \cb3 config\cf2 \cb3 (\cf2 \cb3 text\cf2 \cb3 =\cf2 \cb3 "Subtotal: $\cf2 \cb3 \{:.2f\}\cf2 \cb3 "\cf2 \cb3 .\cf2 \cb3 format\cf2 \cb3 (\cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 subtotal\cf2 \cb3 ))\
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 tax\cf2 \cb3  = \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 subtotal\cf2 \cb3  * \cf2 \cb3 0.1\cf2 \cb3 \
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 tax_label\cf2 \cb3 .\cf2 \cb3 config\cf2 \cb3 (\cf2 \cb3 text\cf2 \cb3 =\cf2 \cb3 "Tax: $\cf2 \cb3 \{:.2f\}\cf2 \cb3 "\cf2 \cb3 .\cf2 \cb3 format\cf2 \cb3 (\cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 tax\cf2 \cb3 ))\
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 total\cf2 \cb3  = \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 subtotal\cf2 \cb3  + \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 tax\cf2 \cb3 \
+        \cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 total_label\cf2 \cb3 .\cf2 \cb3 config\cf2 \cb3 (\cf2 \cb3 text\cf2 \cb3 =\cf2 \cb3 "Total: $\cf2 \cb3 \{:.2f\}\cf2 \cb3 "\cf2 \cb3 .\cf2 \cb3 format\cf2 \cb3 (\cf2 \cb3 self\cf2 \cb3 .\cf2 \cb3 total\cf2 \cb3 ))\
+        \
+\
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb3 if\cf2 \cb3  \cf2 \cb3 __name__\cf2 \cb3  == \cf2 \cb3 "__main__"\cf2 \cb3 :\
+    \cf2 \cb3 root\cf2 \cb3  = \cf2 \cb3 tk\cf2 \cb3 .\cf2 \cb3 Tk\cf2 \cb3 ()\
+    \cf2 \cb3 app\cf2 \cb3  = \cf2 \cb3 CashRegisterGUI\cf2 \cb3 (\cf2 \cb3 master\cf2 \cb3 =\cf2 \cb3 root\cf2 \cb3 )\
+    \cf2 \cb3 app\cf2 \cb3 .\cf2 \cb3 mainloop\cf2 \cb3 ()\
+}
