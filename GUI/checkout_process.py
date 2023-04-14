@@ -3,7 +3,6 @@ import tkinter.messagebox
 import pyttsx3
 from tkinter import ttk
 from PIL import Image, ImageTk
-from new_gui_model import proceed_to_checkout
 
 class CashRegister(tk.Frame):
 
