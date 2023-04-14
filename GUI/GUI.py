@@ -50,14 +50,14 @@ class CashRegisterApp(tk.Tk):
         soda_image = ImageTk.PhotoImage(Image.open("GUI/item3.png").resize((150, 150)))
 
         # Create a list of items with their respective prices
-        items = [
+        self.items = [
             ("Water", 1.00, water_image),
             ("Chips", 1.50, chips_image),
             ("Soda", 2.00, soda_image),
         ]
 
         # Create buttons for each item
-        for i, (item_name, item_price, item_image) in enumerate(items):
+        for i, (item_name, item_price, item_image) in enumerate(self.items):
             button = tk.Button(
                 self.cash_register_page,
                 text=f"{item_name}\n${item_price:.2f}",
@@ -103,8 +103,6 @@ class CashRegisterApp(tk.Tk):
         remove_label.grid(row=3, column=3, padx=20, pady=10)
         self.remove_button = tk.Button(self.cash_register_page, text="Remove", font=("Open Sans", 20), command=self.remove_item, bg="#FF5722", fg="#FFFFFF", relief="groove", borderwidth=2)
         self.remove_button.grid(row=4, column=3, padx=20, pady=10, ipadx=20, ipady=10)
-
-
 
     def add_item_price(self, price, item_name):
         self.total += price
@@ -238,10 +236,29 @@ class CashRegisterApp(tk.Tk):
         else:
             print("Incorrect passcode.")
 
-
     def create_admin_page(self):
         self.admin_page = tk.Frame(self)
         self.admin_page.grid(row=0, column=0, sticky="nsew")
+        # Item management label
+        self.item_mgmt_label = tk.Label(self.admin_page, text="Item Management")
+        self.item_mgmt_label.grid(row=0, column=0, padx=10, pady=10)
+
+        # Item listbox
+        self.item_listbox = tk.Listbox(self.admin_page, font=("Open Sans", 16), height=10, width=30)
+        self.item_listbox.grid(row=1, column=0, padx=10, pady=10)
+        self.populate_item_listbox()
+
+        # Add item button
+        self.add_item_button = tk.Button(self.admin_page, text="Add Item", font=("Open Sans", 16), command=self.add_item)
+        self.add_item_button.grid(row=2, column=0, padx=10, pady=10)
+
+        # Edit item button
+        self.edit_item_button = tk.Button(self.admin_page, text="Edit Item", font=("Open Sans", 16), command=self.edit_item)
+        self.edit_item_button.grid(row=3, column=0, padx=10, pady=10)
+
+        # Delete item button
+        self.delete_item_button = tk.Button(self.admin_page, text="Delete Item", font=("Open Sans", 16), command=self.delete_item)
+        self.delete_item_button.grid(row=4, column=0, padx=10, pady=10)
 
         # Admin label and entry
         self.admin_label = tk.Label(self.admin_page, text="Enter new passcode:")
@@ -260,8 +277,71 @@ class CashRegisterApp(tk.Tk):
         # Logout button
         self.logout_button_admin = tk.Button(self.admin_page, text="Logout", font=("Open Sans", 16), command=self.back_to_passcode_page)
         self.logout_button_admin.grid(row=4, column=1, padx=10, pady=10)
+        
+    def populate_item_listbox(self):
+        self.item_listbox.delete(0, tk.END)
+        for item_name, item_price in self.items:
+            self.item_listbox.insert(tk.END, f"{item_name} - ${item_price:.2f}")
 
+    def add_item(self):
+        item_name = self.new_item_name_entry.get()
+        item_price = float(self.new_item_price_entry.get())
 
+        # Check if the item already exists
+        for existing_item in self.items:
+            if existing_item[0] == item_name:
+                messagebox.showerror("Error", "Item already exists.")
+                return
+
+        # Add item to the items list
+        self.items.append((item_name, item_price))
+
+        # Update item buttons
+        self.update_item_buttons()
+
+        # Clear the input fields
+        self.new_item_name_entry.delete(0, tk.END)
+        self.new_item_price_entry.delete(0, tk.END)
+
+    def edit_item(self):
+        old_item_name = self.edit_item_name_entry.get()
+        new_item_name = self.new_edit_item_name_entry.get()
+        new_item_price = float(self.new_edit_item_price_entry.get())
+
+        # Find the item in the list
+        for i, item in enumerate(self.items):
+            if item[0] == old_item_name:
+                # Update the item
+                self.items[i] = (new_item_name, new_item_price)
+
+                # Update item buttons
+                self.update_item_buttons()
+
+                # Clear the input fields
+                self.edit_item_name_entry.delete(0, tk.END)
+                self.new_edit_item_name_entry.delete(0, tk.END)
+                self.new_edit_item_price_entry.delete(0, tk.END)
+                return
+
+        messagebox.showerror("Error", "Item not found.")
+
+    def delete_item(self):
+        item_name = self.delete_item_name_entry.get()
+
+        # Find the item in the list
+        for i, item in enumerate(self.items):
+            if item[0] == item_name:
+                # Remove the item from the list
+                self.items.pop(i)
+
+                # Update item buttons
+                self.update_item_buttons()
+
+                # Clear the input field
+                self.delete_item_name_entry.delete(0, tk.END)
+                return
+
+        messagebox.showerror("Error", "Item not found.")
 
     def change_password(self):
         new_password = self.new_password_entry.get()
@@ -277,8 +357,6 @@ class CashRegisterApp(tk.Tk):
             messagebox.showerror("Error", "Passwords do not match, please try again.")
             self.new_password_entry.delete(0, tk.END)
             self.confirm_new_password_entry.delete(0, tk.END)
-
-
 
 if __name__ == "__main__":
     app = CashRegisterApp()
