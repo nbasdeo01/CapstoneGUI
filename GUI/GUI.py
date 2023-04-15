@@ -280,7 +280,7 @@ class CashRegisterApp(tk.Tk):
         
     def populate_item_listbox(self):
         self.item_listbox.delete(0, tk.END)
-        for item_name, item_price in self.items:
+        for item_name, item_price, _ in self.items:
             self.item_listbox.insert(tk.END, f"{item_name} - ${item_price:.2f}")
 
     def add_item(self):
