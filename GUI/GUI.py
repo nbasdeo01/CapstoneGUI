@@ -2,12 +2,17 @@ import tkinter as tk
 from tkinter import messagebox
 import sqlite3
 from PIL import Image, ImageTk
+import subprocess
 
 class CashRegisterApp(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Cash Register")
-        self.geometry("1024x600")  
+        self.geometry("1024x600") 
+        self.attributes("-fullscreen", True)
+        self.bind("<Escape>", self.exit_fullscreen)
+
+ 
         self.correct_passcode = "1234" 
         self.admin_page = tk.Frame(self)
         self.passcode_page = tk.Frame(self)
@@ -29,6 +34,11 @@ class CashRegisterApp(tk.Tk):
         x = screen_width // 2 - size[0] // 2
         y = screen_height // 2 - size[1] // 2
         self.geometry(f"{size[0]}x{size[1]}+{x}+{y}")
+
+    def exit_fullscreen(self, event=None):
+        self.attributes("-fullscreen", False)
+        self.geometry("1024x600")
+
 
     def back_to_passcode_page(self):
         self.admin_page.grid_remove()
@@ -123,10 +133,12 @@ class CashRegisterApp(tk.Tk):
         self.passcode_page.columnconfigure(2, weight=1)
 
         # Passcode label and entry
-        self.passcode_label = tk.Label(self.passcode_page, text="Enter passcode:", font=("Open Sans", 18), bg="#F5F5F5", fg="#333333")
-        self.passcode_label.grid(row=0, column=1, padx=10, pady=10)
-        self.passcode_entry = tk.Entry(self.passcode_page, font=("Open Sans", 16), show="*", width=10, relief="groove", borderwidth=2)
-        self.passcode_entry.grid(row=1, column=1, padx=10, pady=10)
+        self.passcode_label = tk.Label(self.passcode_page, text="Enter passcode:", font=("Open Sans", 28), bg="#F5F5F5", fg="#333333")
+        self.passcode_label.grid(row=0, column=1, padx=20, pady=(50, 10))
+        self.passcode_entry = tk.Entry(self.passcode_page, font=("Open Sans", 18), show="*", width=10, relief="groove", borderwidth=2)
+        self.passcode_entry.grid(row=1, column=1, padx=20, pady=10)
+
+        
 
         # Keypad buttons
         buttons = [
@@ -142,17 +154,26 @@ class CashRegisterApp(tk.Tk):
             ("0", 5, 1),
         ]
 
+        def on_enter(event):
+            event.widget.config(bg="#64B5F6")
+
+        def on_leave(event):
+            event.widget.config(bg="#2196F3")
+
         for button_text, row, column in buttons:
-            button = tk.Button(self.passcode_page, text=button_text, font=("Open Sans", 16), command=lambda text=button_text: self.update_passcode_entry(text), bg="#2196F3", fg="#FFFFFF", relief="groove", borderwidth=2)
-            button.grid(row=row, column=column, padx=10, pady=10, ipadx=20, ipady=20)
+            button = tk.Button(self.passcode_page, text=button_text, font=("Open Sans", 50), command=lambda text=button_text: self.update_passcode_entry(text), bg="#2196F3", fg="#FFFFFF", relief="groove", borderwidth=2)
+            button.grid(row=row, column=column, padx=(0, 0) if column != 2 else (0, 0), pady=0, ipadx=135, ipady=30)
+            button.bind("<Enter>", on_enter)
+            button.bind("<Leave>", on_leave)
+
 
         # Submit button
-        self.submit_button = tk.Button(self.passcode_page, text="Submit", font=("Open Sans", 18), command=self.submit_passcode, bg="#4CAF50", fg="#FFFFFF", relief="groove", borderwidth=2)
-        self.submit_button.grid(row=6, column=1, padx=10, pady=10, ipadx=20, ipady=10)
+        self.submit_button = tk.Button(self.passcode_page, text="Enter", font=("Open Sans", 20), command=self.submit_passcode, bg="#4CAF50", fg="#FFFFFF", relief="groove", borderwidth=2)
+        self.submit_button.grid(row=5, column=2, padx=0, pady=0, ipadx=110, ipady=30)
 
         # Clear button
-        self.clear_button = tk.Button(self.passcode_page, text="Clear", font=("Open Sans", 18), command=self.clear_passcode_entry, bg="#FF5722", fg="#FFFFFF", relief="groove", borderwidth=2)
-        self.clear_button.grid(row=6, column=2, padx=10, pady=10, ipadx=20, ipady=10)
+        self.clear_button = tk.Button(self.passcode_page, text="Clear", font=("Open Sans", 20), command=self.clear_passcode_entry, bg="#FF5722", fg="#FFFFFF", relief="groove", borderwidth=2)
+        self.clear_button.grid(row=5, column=0, padx=0, pady=0, ipadx=110, ipady=30)
 
 
     def update_passcode_entry(self, text):
@@ -177,12 +198,14 @@ class CashRegisterApp(tk.Tk):
         conn.close()
 
     def process_payment(self):
-        transaction_data = "\n".join(self.cart.get(0, tk.END))
-        total = self.total
-        self.save_transaction(transaction_data, total)
-        messagebox.showinfo("Payment", f"Payment of ${self.total:.2f} received.")
-        self.cart.delete(0, tk.END)
-        self.clear()
+        try:
+            main_py_path = "//home//jetson//Desktop//CapstoneGUI//Cash_Detection//main.py"
+            subprocess.run(["python", main_py_path, str(self.total)], check=True)
+            self.clear_items()
+        except subprocess.CalledProcessError as e:
+            messagebox.showerror("Error", f"An error occurred while running main.py: {e}")
+
+
 
     def load_password(self):
         conn = sqlite3.connect("cash_register.db")
