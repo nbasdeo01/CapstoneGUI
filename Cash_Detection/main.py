@@ -3,7 +3,8 @@ from Coin_detect import update_total_price
 from calc import calculate_change, display_images, load_bill_and_coin_images
 import open_cash_box
 
-def main():
+def main(target_amount):
+
    
     total_amount = detect_cash(target_amount)
     print("Total amount after bills detection: ${:.2f}".format(total_amount))
@@ -30,6 +31,8 @@ def main():
 
         # Call the function to open the cash register box
         open_cash_box.open_cash_register()
+        
+
     else:
         print("No change due. Not opening cash register box.")
 

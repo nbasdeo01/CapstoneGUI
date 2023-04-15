@@ -183,7 +183,7 @@ class CashRegisterApp(tk.Tk):
 
     def process_payment(self):
         try:
-            main_py_path = "C:\\Users\\Andre\\CapstoneGUI\\Cash_Detection\\main.py"
+            main_py_path = "//home//jetson//Desktop//CapstoneGUI//Cash_Detection//main.py"
             subprocess.run(["python", main_py_path, str(self.total)], check=True)
             self.clear_items()
         except subprocess.CalledProcessError as e:

@@ -3,10 +3,10 @@ import numpy as np
 
 def detect_cash(target_amount):
     # Load YOLOv3 network
-    net = cv2.dnn.readNetFromDarknet("server/detection/Detection_1_2/yolov3-tiny_testing.cfg", "server/detection/Detection_1_2/yolov3-tiny_training_final.weights")
+    net = cv2.dnn.readNetFromDarknet("/home/jetson/Desktop/CapstoneGUI/Cash_Detection/yolov3-tiny_testing.cfg", "/home/jetson/Desktop/CapstoneGUI/Cash_Detection/yolov3-tiny_training_final.weights")
 
     # Load list of classes
-    with open("server/detection/Detection_1_2/classes.txt") as f:
+    with open("/home/jetson/Desktop/CapstoneGUI/Cash_Detection/classes.txt") as f:
         classes = [line.strip() for line in f.readlines()]
 
     # Initialize variables
