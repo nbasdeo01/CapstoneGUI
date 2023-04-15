@@ -1,0 +1,10 @@
+coin_dime
+coin_nickel
+coin_penny
+coin_quarter
+dollar_1
+dollar_10
+dollar_100
+dollar_20
+dollar_5
+dollar_50

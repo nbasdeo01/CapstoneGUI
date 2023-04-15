@@ -95,7 +95,7 @@ class CashRegisterApp(tk.Tk):
         self.total = 0.0
 
     def create_cart(self):
-        self.cart = tk.Listbox(self.cash_register_page, font=("Open Sans", 20), height=10, width=20)
+        self.cart = tk.Listbox(self.cash_register_page, font=("Open Sans", 20), height=10, width=10)
         self.cart.grid(row=0, column=3, rowspan=3, padx=20, pady=20)
 
     def create_remove_button(self):
