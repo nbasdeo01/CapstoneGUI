@@ -52,7 +52,8 @@ def update_total_price(total_amount, target_amount):
             frame_amount += coin_values[coin_type]
             cv2.circle(frame, (x, y), r, (0, 255, 0), 2)
 
-        cv2.putText(frame, f'Current amount: $ {total_amount:.2f}', (10, 30),
+        cv2.putText(frame, 'Current amount: ${:.2f}'.format(total_amount), (10, 30),
+
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
 
         cv2.imshow('Coins', frame)

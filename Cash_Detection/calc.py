@@ -30,7 +30,8 @@ def display_images(change_dict, bill_and_coin_images):
             output_image.paste(img, (x_offset, y_offset))
 
             # Draw the quantity text next to the image
-            draw.text((x_offset + img.width + 10, y_offset + img.height // 2 - 10), f"{value} x {key}", font=font, fill="black")
+            draw.text((x_offset + img.width + 10, y_offset + img.height // 2 - 10), "{} x {}".format(value, key), font=font, fill="black")
+
 
             # Update the y_offset for the next image
             y_offset += img.height + 20
@@ -50,7 +51,8 @@ def calculate_change(current_amount, target_amount):
         return
 
     change = current_amount - target_amount
-    print(f"Change to give back: ${change:.2f}")
+    print("Change to give back: ${:.2f}".format(change))
+
 
     bills_and_coins = [100, 50, 20, 10, 5, 1, 0.25, 0.10, 0.05, 0.01]
     bill_and_coin_names = ["$100 bill", "$50 bill", "$20 bill", "$10 bill", "$5 bill", "$1 bill",
@@ -66,7 +68,8 @@ def calculate_change(current_amount, target_amount):
 
     print("Best combination of coins and bills to give back:")
     for key, value in change_dict.items():
-        print(f"{value} x {key}")
+        print("{} x {}".format(value, key))
+
 
     return change_dict
 
@@ -83,16 +86,16 @@ def main():
 
 def load_bill_and_coin_images():
     return {
-        "$100 bill": Image.open("server/detection/Detection_1_2/images/100.jpg"),
-        "$50 bill": Image.open("server/detection/Detection_1_2/images/50.jpg"),
-        "$20 bill": Image.open("server/detection/Detection_1_2/images/20.jpg"),
-        "$10 bill": Image.open("server/detection/Detection_1_2/images/10.jpg"),
-        "$5 bill": Image.open("server/detection/Detection_1_2/images/5.jpg"),
-        "$1 bill": Image.open("server/detection/Detection_1_2/images/1.jpg"),
-        "quarter": Image.open("server/detection/Detection_1_2/images/.25.jpg"),
-        "dime": Image.open("server/detection/Detection_1_2/images/.10.jpg"),
-        "nickel": Image.open("server/detection/Detection_1_2/images/.5.jpg"),
-        "penny": Image.open("server/detection/Detection_1_2/images/.1.jpg"),
+        "$100 bill": Image.open("/home/jetson/Desktop/CapstoneGUI/Cash_Detection/images/100.jpg"),
+        "$50 bill": Image.open("/home/jetson/Desktop/CapstoneGUI/Cash_Detection/images/50.jpg"),
+        "$20 bill": Image.open("/home/jetson/Desktop/CapstoneGUI/Cash_Detection/images/20.jpg"),
+        "$10 bill": Image.open("/home/jetson/Desktop/CapstoneGUI/Cash_Detection/images/10.jpg"),
+        "$5 bill": Image.open("/home/jetson/Desktop/CapstoneGUI/Cash_Detection/images/5.jpg"),
+        "$1 bill": Image.open("/home/jetson/Desktop/CapstoneGUI/Cash_Detection/images/1.jpg"),
+        "quarter": Image.open("/home/jetson/Desktop/CapstoneGUI/Cash_Detection/images/.25.jpg"),
+        "dime": Image.open("/home/jetson/Desktop/CapstoneGUI/Cash_Detection/images/.10.jpg"),
+        "nickel": Image.open("/home/jetson/Desktop/CapstoneGUI/Cash_Detection/images/.5.jpg"),
+        "penny": Image.open("/home/jetson/Desktop/CapstoneGUI/Cash_Detection/images/.1.jpg"),
     }
 
 if __name__ == "__main__":

@@ -2,13 +2,20 @@ import tkinter as tk
 from tkinter import messagebox
 import sqlite3
 from PIL import Image, ImageTk
+import subprocess
 
 class CashRegisterApp(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Cash Register")
-        self.geometry("1024x600")  
+        self.geometry("1024x600") 
+        self.attributes("-fullscreen", True)
+        self.bind("<Escape>", self.exit_fullscreen)
+
+ 
         self.correct_passcode = "1234" 
+        self.admin_page = tk.Frame(self)
+        self.passcode_page = tk.Frame(self)
         self.create_passcode_page()
         self.create_cash_register_page()
         self.create_admin_page()
@@ -28,15 +35,14 @@ class CashRegisterApp(tk.Tk):
         y = screen_height // 2 - size[1] // 2
         self.geometry(f"{size[0]}x{size[1]}+{x}+{y}")
 
+    def exit_fullscreen(self, event=None):
+        self.attributes("-fullscreen", False)
+        self.geometry("1024x600")
+
+
     def back_to_passcode_page(self):
         self.admin_page.grid_remove()
         self.passcode_page.grid()
-
-    def logout(self):
-        self.cash_register_page.grid_remove()
-        self.passcode_page.grid()
-        self.clear_passcode_entry()
-
 
     def clear_passcode_entry(self):
         self.passcode_entry.delete(0, 'end')
@@ -84,12 +90,13 @@ class CashRegisterApp(tk.Tk):
         self.pay_button.grid(row=4, column=0, padx=20, pady=20, ipadx=30, ipady=10)
 
         # Clear button
-        self.clear_button = tk.Button(self.cash_register_page, text="Clear", font=("Open Sans", 16), command=self.clear, bg="#FF5722", fg="#FFFFFF", relief="groove", borderwidth=2)
+        self.clear_button = tk.Button(self.cash_register_page, text="Clear", font=("Open Sans", 20), command=self.clear_items, bg="#FF5722", fg="#FFFFFF", relief="groove", borderwidth=2)
         self.clear_button.grid(row=4, column=1, padx=20, pady=20, ipadx=20, ipady=10)
 
         # Logout button
-        self.logout_button = tk.Button(self.cash_register_page, text="Logout", font=("Open Sans", 16), command=self.logout, bg="#9C27B0", fg="#FFFFFF", relief="groove", borderwidth=2)
+        self.logout_button = tk.Button(self.cash_register_page, text="Logout", font=("Open Sans", 16), command=self.logout, bg="red", fg = "white")
         self.logout_button.grid(row=4, column=2, padx=20, pady=20, ipadx=20, ipady=10)
+
 
         # Initialize total
         self.total = 0.0
@@ -127,10 +134,12 @@ class CashRegisterApp(tk.Tk):
         self.passcode_page.columnconfigure(2, weight=1)
 
         # Passcode label and entry
-        self.passcode_label = tk.Label(self.passcode_page, text="Enter passcode:", font=("Open Sans", 18), bg="#F5F5F5", fg="#333333")
-        self.passcode_label.grid(row=0, column=1, padx=10, pady=10)
-        self.passcode_entry = tk.Entry(self.passcode_page, font=("Open Sans", 16), show="*", width=10, relief="groove", borderwidth=2)
-        self.passcode_entry.grid(row=1, column=1, padx=10, pady=10)
+        self.passcode_label = tk.Label(self.passcode_page, text="Enter passcode:", font=("Open Sans", 28), bg="#F5F5F5", fg="#333333")
+        self.passcode_label.grid(row=0, column=1, padx=20, pady=(50, 10))
+        self.passcode_entry = tk.Entry(self.passcode_page, font=("Open Sans", 18), show="*", width=10, relief="groove", borderwidth=2)
+        self.passcode_entry.grid(row=1, column=1, padx=20, pady=10)
+
+        
 
         # Keypad buttons
         buttons = [
@@ -146,17 +155,26 @@ class CashRegisterApp(tk.Tk):
             ("0", 5, 1),
         ]
 
+        def on_enter(event):
+            event.widget.config(bg="#64B5F6")
+
+        def on_leave(event):
+            event.widget.config(bg="#2196F3")
+
         for button_text, row, column in buttons:
-            button = tk.Button(self.passcode_page, text=button_text, font=("Open Sans", 16), command=lambda text=button_text: self.update_passcode_entry(text), bg="#2196F3", fg="#FFFFFF", relief="groove", borderwidth=2)
-            button.grid(row=row, column=column, padx=10, pady=10, ipadx=20, ipady=20)
+            button = tk.Button(self.passcode_page, text=button_text, font=("Open Sans", 50), command=lambda text=button_text: self.update_passcode_entry(text), bg="#2196F3", fg="#FFFFFF", relief="groove", borderwidth=2)
+            button.grid(row=row, column=column, padx=(0, 0) if column != 2 else (0, 0), pady=0, ipadx=135, ipady=30)
+            button.bind("<Enter>", on_enter)
+            button.bind("<Leave>", on_leave)
+
 
         # Submit button
-        self.submit_button = tk.Button(self.passcode_page, text="Submit", font=("Open Sans", 18), command=self.submit_passcode, bg="#4CAF50", fg="#FFFFFF", relief="groove", borderwidth=2)
-        self.submit_button.grid(row=6, column=1, padx=10, pady=10, ipadx=20, ipady=10)
+        self.submit_button = tk.Button(self.passcode_page, text="Enter", font=("Open Sans", 20), command=self.submit_passcode, bg="#4CAF50", fg="#FFFFFF", relief="groove", borderwidth=2)
+        self.submit_button.grid(row=5, column=2, padx=0, pady=0, ipadx=110, ipady=30)
 
         # Clear button
-        self.clear_button = tk.Button(self.passcode_page, text="Clear", font=("Open Sans", 18), command=self.clear_passcode_entry, bg="#FF5722", fg="#FFFFFF", relief="groove", borderwidth=2)
-        self.clear_button.grid(row=6, column=2, padx=10, pady=10, ipadx=20, ipady=10)
+        self.clear_button = tk.Button(self.passcode_page, text="Clear", font=("Open Sans", 20), command=self.clear_passcode_entry, bg="#FF5722", fg="#FFFFFF", relief="groove", borderwidth=2)
+        self.clear_button.grid(row=5, column=0, padx=0, pady=0, ipadx=110, ipady=30)
 
 
     def update_passcode_entry(self, text):
@@ -181,12 +199,14 @@ class CashRegisterApp(tk.Tk):
         conn.close()
 
     def process_payment(self):
-        transaction_data = "\n".join(self.cart.get(0, tk.END))
-        total = self.total
-        self.save_transaction(transaction_data, total)
-        messagebox.showinfo("Payment", f"Payment of ${self.total:.2f} received.")
-        self.cart.delete(0, tk.END)
-        self.clear()
+        try:
+            main_py_path = "//home//jetson//Desktop//CapstoneGUI//Cash_Detection//main.py"
+            subprocess.run(["python", main_py_path, str(self.total)], check=True)
+            self.clear_items()
+        except subprocess.CalledProcessError as e:
+            messagebox.showerror("Error", f"An error occurred while running main.py: {e}")
+
+
 
     def load_password(self):
         conn = sqlite3.connect("cash_register.db")
@@ -211,6 +231,14 @@ class CashRegisterApp(tk.Tk):
     def clear(self):
         self.total = 0.0
         self.total_var.set("0.00")
+
+    def clear_items(self):
+        response = messagebox.askyesno("Clear items", "Are you sure you want to clear all items?")
+        if response:
+            self.cart.delete(0, tk.END)
+            self.total = 0.0
+            self.total_var.set(f"${self.total:.2f}")
+
 
     def check_passcode(self):
         admin_password = "1111"  # Set your desired admin password here
@@ -239,65 +267,84 @@ class CashRegisterApp(tk.Tk):
     def create_admin_page(self):
         self.admin_page = tk.Frame(self)
         self.admin_page.grid(row=0, column=0, sticky="nsew")
+
         # Item management label
-        self.item_mgmt_label = tk.Label(self.admin_page, text="Item Management")
+        self.item_mgmt_label = tk.Label(self.admin_page, text="Item Management", font=("Open Sans", 16))
         self.item_mgmt_label.grid(row=0, column=0, padx=10, pady=10)
 
         # Item listbox
         self.item_listbox = tk.Listbox(self.admin_page, font=("Open Sans", 16), height=10, width=30)
         self.item_listbox.grid(row=1, column=0, padx=10, pady=10)
         self.populate_item_listbox()
-        # Add item label and entry
-        self.add_item_label = tk.Label(self.admin_page, text="Add item:")
-        self.add_item_label.grid(row=1, column=1, padx=10, pady=5)
-        self.add_item_entry = tk.Entry(self.admin_page, font=("Open Sans", 16), width=10)
-        self.add_item_entry.grid(row=1, column=2, padx=10, pady=5)
-
-        # Edit item label and entry
-        self.edit_item_label = tk.Label(self.admin_page, text="Edit item:")
-        self.edit_item_label.grid(row=2, column=1, padx=10, pady=5)
-        self.edit_item_entry = tk.Entry(self.admin_page, font=("Open Sans", 16), width=10)
-        self.edit_item_entry.grid(row=2, column=2, padx=10, pady=5)
-
-        # Delete item label and entry
-        self.delete_item_label = tk.Label(self.admin_page, text="Delete item:")
-        self.delete_item_label.grid(row=3, column=1, padx=10, pady=5)
-        self.delete_item_entry = tk.Entry(self.admin_page, font=("Open Sans", 16), width=10)
-        self.delete_item_entry.grid(row=3, column=2, padx=10, pady=5)
-
-        # Add item button
-        self.add_item_button = tk.Button(self.admin_page, text="Add Item", font=("Open Sans", 16), command=self.add_item)
-        self.add_item_button.grid(row=1, column=3, padx=10, pady=10)
 
         # Edit item button
         self.edit_item_button = tk.Button(self.admin_page, text="Edit Item", font=("Open Sans", 16), command=self.edit_item)
-        self.edit_item_button.grid(row=2, column=3, padx=10, pady=10)
+        self.edit_item_button.grid(row=2, column=0, padx=10, pady=10)
+
+        # Delete item entry
+        self.delete_item_name_entry = tk.Entry(self.admin_page, font=("Open Sans", 16), width=30)
+        self.delete_item_name_entry.grid(row=4, column=1, padx=10, pady=10)
 
         # Delete item button
         self.delete_item_button = tk.Button(self.admin_page, text="Delete Item", font=("Open Sans", 16), command=self.delete_item)
-        self.delete_item_button.grid(row=3, column=3, padx=10, pady=10)
+        self.delete_item_button.grid(row=3, column=0, padx=10, pady=10)
 
-        # Admin label and entry
+        # Add item label
+        self.add_item_label = tk.Label(self.admin_page, text="Add Item", font=("Open Sans", 16))
+        self.add_item_label.grid(row=0, column=1, padx=10, pady=10)
+
+        # Add item inputs
+        self.new_item_name_label = tk.Label(self.admin_page, text="Item name:", padx=10, pady=10, font=("Open Sans", 16), bg="#FFFFFF", fg="#000000")
+        self.new_item_name_label.grid(row=1, column=1, padx=10, pady=10)
+        self.new_item_name_entry = tk.Entry(self.admin_page, font=("Open Sans", 16))
+        self.new_item_name_entry.grid(row=1, column=2, padx=10, pady=10)
+
+        self.new_item_price_label = tk.Label(self.admin_page, text="Item price:", padx=10, pady=10, font=("Open Sans", 16), bg="#FFFFFF", fg="#000000")
+        self.new_item_price_label.grid(row=2, column=1, padx=10, pady=10)
+        self.new_item_price_entry = tk.Entry(self.admin_page, font=("Open Sans", 16))
+        self.new_item_price_entry.grid(row=2, column=2, padx=10, pady=10)
+
+        # Add item button
+        self.add_item_button = tk.Button(self.admin_page, text="Add Item", font=("Open Sans", 16), command=self.add_item)
+        self.add_item_button.grid(row=3, column=1, padx=10, pady=10, columnspan=2)
+
+        # Passcode Management
         self.admin_label = tk.Label(self.admin_page, text="Enter new passcode:")
-        self.admin_label.grid(row=0, column=1, padx=10, pady=10)
+        self.admin_label.grid(row=4, column=1, padx=10, pady=10)
         self.admin_entry = tk.Entry(self.admin_page, font=("Open Sans", 16), show="*", width=10)
-        self.admin_entry.grid(row=1, column=1, padx=10, pady=10)
+        self.admin_entry.grid(row=4, column=2, padx=10, pady=10)
 
         # Update passcode button
-        self.update_passcode_button = tk.Button(self.admin_page, text="Update Passcode", font=("Open Sans", 16), command=self.update_passcode)
-        self.update_passcode_button.grid(row=2, column=1, padx=10, pady=10)
-
-        # Back button
-        self.back_button = tk.Button(self.admin_page, text="Back", font=("Open Sans", 16), command=self.back_to_passcode_page)
-        self.back_button.grid(row=3, column=1, padx=10, pady=10)
+        self.update_passcode_button = tk.Button(self.admin_page, text="Update Passcode", font = ("Open Sans", 16), command=self.change_password)
+        self.update_passcode_button.grid(row=5, column=1, padx=10, pady=10, columnspan=2)
 
         # Logout button
-        self.logout_button_admin = tk.Button(self.admin_page, text="Logout", font=("Open Sans", 16), command=self.back_to_passcode_page)
-        self.logout_button_admin.grid(row=4, column=1, padx=10, pady=10)
-        
+        self.logout_button_admin = tk.Button(self.admin_page, text="Logout", font=("Open Sans", 16), command=self.logout, bg="#FF5722", fg="#FFFFFF", relief="groove", borderwidth=2)
+        self.logout_button_admin.grid(row=6, column=1, padx=10, pady=10, columnspan=2)
+
     def populate_item_listbox(self):
         self.item_listbox.delete(0, tk.END)
-        for item_name, item_price, _ in self.items:
+        for item in self.items:
+            item_name, item_price = item[:2]
+            self.item_listbox.insert(tk.END, f"{item_name} - ${item_price:.2f}")
+
+    def update_item_buttons(self):
+        self.populate_item_listbox()
+        self.item_buttons_frame.grid_forget()
+        self.item_buttons_frame.destroy()
+        self.item_buttons_frame = tk.Frame(self.item_page)
+        self.create_item_buttons()
+        self.item_buttons_frame.grid(row=2, column=0, padx=20, pady=20)
+        
+    def update_item_listbox(self):
+        self.item_listbox.delete(0, tk.END)
+        for item in self.items:
+            if len(item) == 2:
+                item_name, item_price = item
+            elif len(item) == 3:
+                item_name, item_price, _ = item
+            else:
+                continue
             self.item_listbox.insert(tk.END, f"{item_name} - ${item_price:.2f}")
 
     def add_item(self):
@@ -315,6 +362,7 @@ class CashRegisterApp(tk.Tk):
 
         # Update item buttons
         self.update_item_buttons()
+        self.update_item_listbox()
 
         # Clear the input fields
         self.new_item_name_entry.delete(0, tk.END)
@@ -347,16 +395,19 @@ class CashRegisterApp(tk.Tk):
 
         # Find the item in the list
         for i, item in enumerate(self.items):
-            if item[0] == item_name:
+            if item[0].strip() == item_name.strip():
                 # Remove the item from the list
                 self.items.pop(i)
+
                 # Update item buttons
                 self.update_item_buttons()
+
                 # Clear the input field
                 self.delete_item_name_entry.delete(0, tk.END)
                 return
 
         messagebox.showerror("Error", "Item not found.")
+
 
     def change_password(self):
         new_password = self.new_password_entry.get()
@@ -372,6 +423,12 @@ class CashRegisterApp(tk.Tk):
             messagebox.showerror("Error", "Passwords do not match, please try again.")
             self.new_password_entry.delete(0, tk.END)
             self.confirm_new_password_entry.delete(0, tk.END)
+
+    def logout(self):
+        self.admin_page.grid_remove()
+        self.cash_register_page.grid_remove()
+        self.passcode_page.grid()
+        self.passcode_entry.delete(0, tk.END)
 
 if __name__ == "__main__":
     app = CashRegisterApp()

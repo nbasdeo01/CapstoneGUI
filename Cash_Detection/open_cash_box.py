@@ -1,7 +1,7 @@
 import RPi.GPIO as GPIO
 import time
 
-def main():
+def open_cash_register():
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(40,GPIO.OUT)
         GPIO.output(40,True)
@@ -11,4 +11,4 @@ def main():
 
 
 if __name__ == "__main__":
-        main()
+        open_cash_register()
