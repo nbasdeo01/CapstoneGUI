@@ -247,18 +247,35 @@ class CashRegisterApp(tk.Tk):
         self.item_listbox = tk.Listbox(self.admin_page, font=("Open Sans", 16), height=10, width=30)
         self.item_listbox.grid(row=1, column=0, padx=10, pady=10)
         self.populate_item_listbox()
+        # Add item label and entry
+        self.add_item_label = tk.Label(self.admin_page, text="Add item:")
+        self.add_item_label.grid(row=1, column=1, padx=10, pady=5)
+        self.add_item_entry = tk.Entry(self.admin_page, font=("Open Sans", 16), width=10)
+        self.add_item_entry.grid(row=1, column=2, padx=10, pady=5)
+
+        # Edit item label and entry
+        self.edit_item_label = tk.Label(self.admin_page, text="Edit item:")
+        self.edit_item_label.grid(row=2, column=1, padx=10, pady=5)
+        self.edit_item_entry = tk.Entry(self.admin_page, font=("Open Sans", 16), width=10)
+        self.edit_item_entry.grid(row=2, column=2, padx=10, pady=5)
+
+        # Delete item label and entry
+        self.delete_item_label = tk.Label(self.admin_page, text="Delete item:")
+        self.delete_item_label.grid(row=3, column=1, padx=10, pady=5)
+        self.delete_item_entry = tk.Entry(self.admin_page, font=("Open Sans", 16), width=10)
+        self.delete_item_entry.grid(row=3, column=2, padx=10, pady=5)
 
         # Add item button
         self.add_item_button = tk.Button(self.admin_page, text="Add Item", font=("Open Sans", 16), command=self.add_item)
-        self.add_item_button.grid(row=2, column=0, padx=10, pady=10)
+        self.add_item_button.grid(row=1, column=3, padx=10, pady=10)
 
         # Edit item button
         self.edit_item_button = tk.Button(self.admin_page, text="Edit Item", font=("Open Sans", 16), command=self.edit_item)
-        self.edit_item_button.grid(row=3, column=0, padx=10, pady=10)
+        self.edit_item_button.grid(row=2, column=3, padx=10, pady=10)
 
         # Delete item button
         self.delete_item_button = tk.Button(self.admin_page, text="Delete Item", font=("Open Sans", 16), command=self.delete_item)
-        self.delete_item_button.grid(row=4, column=0, padx=10, pady=10)
+        self.delete_item_button.grid(row=3, column=3, padx=10, pady=10)
 
         # Admin label and entry
         self.admin_label = tk.Label(self.admin_page, text="Enter new passcode:")
@@ -333,10 +350,8 @@ class CashRegisterApp(tk.Tk):
             if item[0] == item_name:
                 # Remove the item from the list
                 self.items.pop(i)
-
                 # Update item buttons
                 self.update_item_buttons()
-
                 # Clear the input field
                 self.delete_item_name_entry.delete(0, tk.END)
                 return
