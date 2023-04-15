@@ -84,7 +84,7 @@ class CashRegisterApp(tk.Tk):
         self.pay_button.grid(row=4, column=0, padx=20, pady=20, ipadx=30, ipady=10)
 
         # Clear button
-        self.clear_button = tk.Button(self.cash_register_page, text="Clear", font=("Open Sans", 16), command=self.clear, bg="#FF5722", fg="#FFFFFF", relief="groove", borderwidth=2)
+        self.clear_button = tk.Button(self.cash_register_page, text="Clear", font=("Open Sans", 20), command=self.clear_items, bg="#FF5722", fg="#FFFFFF", relief="groove", borderwidth=2)
         self.clear_button.grid(row=4, column=1, padx=20, pady=20, ipadx=20, ipady=10)
 
         # Logout button
@@ -211,6 +211,14 @@ class CashRegisterApp(tk.Tk):
     def clear(self):
         self.total = 0.0
         self.total_var.set("0.00")
+
+    def clear_items(self):
+        response = messagebox.askyesno("Clear items", "Are you sure you want to clear all items?")
+        if response:
+            self.cart.delete(0, tk.END)
+            self.total = 0.0
+            self.total_var.set(f"${self.total:.2f}")
+
 
     def check_passcode(self):
         admin_password = "1111"  # Set your desired admin password here
