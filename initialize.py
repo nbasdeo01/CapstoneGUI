@@ -2,13 +2,13 @@ import sqlite3
 from sqlite3 import Error
 
 # users
-def add_new_user(cur, id, password, is_admin):
+def add_new_user(cur, password, is_admin):
     cur.execute(f"""
             INSERT INTO
                 USERS
             VALUES 
-                (?,?,?,?)
-            ;""", (None, id, password, is_admin))
+                (?,?)
+            ;""", (password, is_admin))
     return
 
 def create_connection(db_file):
@@ -42,8 +42,6 @@ def main():
     database = "pythonsqlite.db"
 
     sql_create_USERS_table = """ CREATE TABLE IF NOT EXISTS USERS (
-                                    id integer PRIMARY KEY AUTOINCREMENT,
-                                    user_id string NOT NULL,
                                     passcode string NOT NULL,
                                     is_admin integer NOT NULL
                                     ); """
@@ -60,8 +58,8 @@ def main():
                                     items text NOT NULL,
                                     sub_total REAL NOT NULL,
                                     time text NOT NULL,
-                                    user_id string NOT NULL,
-                                    FOREIGN KEY (user_id) REFERENCES USERS (id)
+                                    passcode string NOT NULL,
+                                    FOREIGN KEY (passcode) REFERENCES USERS (password)
                                 );"""
     
     sql_create_EMPLOYEE_TIME_table = """CREATE TABLE IF NOT EXISTS EMPLOYEE_TIME (
@@ -82,10 +80,10 @@ def main():
         create_table(conn, sql_create_EMPLOYEE_TIME_table)
         cur = conn.cursor()
 
-        add_new_user(cur, "1111", "2222", 1)
-        add_new_user(cur, "3333", "4444", 1)
-        add_new_user(cur, "5555", "6666", 0)
-        add_new_user(cur, "7777", "8888", 0)
+        add_new_user(cur, "2222", 1)
+        add_new_user(cur, "4444", 1)
+        add_new_user(cur, "6666", 0)
+        add_new_user(cur, "8888", 0)
         conn.commit()
     else:
         print("Error! Cannot create the database connection.")
