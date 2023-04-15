@@ -94,8 +94,9 @@ class CashRegisterApp(tk.Tk):
         self.clear_button.grid(row=4, column=1, padx=20, pady=20, ipadx=20, ipady=10)
 
         # Logout button
-        self.logout_button_admin = tk.Button(self.admin_page, text="Logout", font=("Open Sans", 16), command=self.logout)
-        self.logout_button_admin.grid(row=4, column=1, padx=10, pady=10)
+        self.logout_button = tk.Button(self.cash_register_page, text="Logout", font=("Open Sans", 16), command=self.logout, bg="red", fg = "white")
+        self.logout_button.grid(row=4, column=2, padx=20, pady=20, ipadx=20, ipady=10)
+
 
         # Initialize total
         self.total = 0.0
@@ -318,8 +319,8 @@ class CashRegisterApp(tk.Tk):
         self.update_passcode_button.grid(row=5, column=1, padx=10, pady=10, columnspan=2)
 
         # Logout button
-        self.logout_button = tk.Button(self.admin_page, text="Logout", font=("Open Sans", 16), command=self.logout, bg="#FF5722", fg="#FFFFFF", relief="groove", borderwidth=2)
-        self.logout_button.grid(row=4, column=2, padx=20, pady=20, ipadx=20, ipady=10)
+        self.logout_button_admin = tk.Button(self.admin_page, text="Logout", font=("Open Sans", 16), command=self.logout, bg="#FF5722", fg="#FFFFFF", relief="groove", borderwidth=2)
+        self.logout_button_admin.grid(row=6, column=1, padx=10, pady=10, columnspan=2)
 
     def populate_item_listbox(self):
         self.item_listbox.delete(0, tk.END)
@@ -327,9 +328,24 @@ class CashRegisterApp(tk.Tk):
             item_name, item_price = item[:2]
             self.item_listbox.insert(tk.END, f"{item_name} - ${item_price:.2f}")
 
-
     def update_item_buttons(self):
         self.populate_item_listbox()
+        self.item_buttons_frame.grid_forget()
+        self.item_buttons_frame.destroy()
+        self.item_buttons_frame = tk.Frame(self.item_page)
+        self.create_item_buttons()
+        self.item_buttons_frame.grid(row=2, column=0, padx=20, pady=20)
+        
+    def update_item_listbox(self):
+        self.item_listbox.delete(0, tk.END)
+        for item in self.items:
+            if len(item) == 2:
+                item_name, item_price = item
+            elif len(item) == 3:
+                item_name, item_price, _ = item
+            else:
+                continue
+            self.item_listbox.insert(tk.END, f"{item_name} - ${item_price:.2f}")
 
     def add_item(self):
         item_name = self.new_item_name_entry.get()
@@ -346,6 +362,7 @@ class CashRegisterApp(tk.Tk):
 
         # Update item buttons
         self.update_item_buttons()
+        self.update_item_listbox()
 
         # Clear the input fields
         self.new_item_name_entry.delete(0, tk.END)

@@ -2,7 +2,6 @@ import cv2
 import numpy as np
 import time
 
-
 def detect_cash(target_amount):
     def iou(box1, box2):
         x1, y1, w1, h1 = box1
@@ -32,8 +31,6 @@ def detect_cash(target_amount):
     process_frame = False
     target_reached = False
     
-    
-
     while not target_reached:
         # Check for keypress
         ret, frame = cap.read()
