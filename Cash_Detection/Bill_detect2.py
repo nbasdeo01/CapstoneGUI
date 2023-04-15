@@ -1,53 +1,69 @@
 import cv2
 import numpy as np
-import time
+import tkinter as tk
+from PIL import Image, ImageTk
+from threading import Thread
 
 def detect_cash(target_amount):
-    def iou(box1, box2):
-        x1, y1, w1, h1 = box1
-        x2, y2, w2, h2 = box2
-        xi1, yi1, xi2, yi2 = max(x1, x2), max(y1, y2), min(x1 + w1, x2 + w2), min(y1 + h1, y2 + h2)
-        if xi2 <= xi1 or yi2 <= yi1:
-            return 0.0
-        intersection_area = (xi2 - xi1) * (yi2 - yi1)
-        box1_area = w1 * h1
-        box2_area = w2 * h2
-        union_area = box1_area + box2_area - intersection_area
-        iou = intersection_area / union_area
-        return iou
-    # Load YOLOv3 network
-    net = cv2.dnn.readNetFromDarknet("server/detection/Detection_1_2/yolov3-tiny_testing.cfg", "server/detection/Detection_1_2/yolov3-tiny_training_final.weights")
-
-    # Load list of classes
-    with open("server/detection/Detection_1_2/classes.txt") as f:
-        classes = [line.strip() for line in f.readlines()]
-
-    # Initialize variables
-    total_amount = 0
-    #cap = cv2.VideoCapture(0)
-    detected_objects = []
-    frames_to_live = 30
-    cap = cv2.VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM),format=NV12,width=640,height=480,framerate=30/1 ! nvvidconv ! video/x-raw,format=BGRx ! videoconvert ! video/x-raw,format=BGR ! appsink drop=1", cv2.CAP_GSTREAMER)
-    process_frame = False
+    cap = None
     target_reached = False
-    
-    while not target_reached:
-        # Check for keypress
-        ret, frame = cap.read()
-        key = cv2.waitKey(1)
+    frame_label = None
+    window = None
+    total_amount = 0
+    def on_detect_click():
+        global process_frame
+        process_frame = True
 
-        # If "q" key is pressed, quit the program and close all windows
-        if key == ord("q"):
-            break
+    def on_quit_click():
+        global target_reached
+        target_reached = True
+        cap.release()
+        window.destroy()
 
-        # If "d" key is pressed, process a single frame
-        elif key == ord("d"):
-            process_frame = True
+    def update_image_label():
+        global frame_label
+        while not target_reached:
+            _, cv_frame = cap.read()
+            image = Image.fromarray(cv2.cvtColor(cv_frame, cv2.COLOR_BGR2RGB))
+            photo = ImageTk.PhotoImage(image)
+            frame_label.config(image=photo)
+            frame_label.image = photo
+            window.update_idletasks()
 
+    def run_detection():  
+        global process_frame, target_reached
+        def iou(box1, box2):
+            x1, y1, w1, h1 = box1
+            x2, y2, w2, h2 = box2
+            xi1, yi1, xi2, yi2 = max(x1, x2), max(y1, y2), min(x1 + w1, x2 + w2), min(y1 + h1, y2 + h2)
+            if xi2 <= xi1 or yi2 <= yi1:
+                return 0.0
+            intersection_area = (xi2 - xi1) * (yi2 - yi1)
+            box1_area = w1 * h1
+            box2_area = w2 * h2
+            union_area = box1_area + box2_area - intersection_area
+            iou = intersection_area / union_area
+            return iou
+        # Load YOLOv3 network
+        net = cv2.dnn.readNetFromDarknet("server/detection/Detection_1_2/yolov3-tiny_testing.cfg", "server/detection/Detection_1_2/yolov3-tiny_training_final.weights")
+
+        # Load list of classes
+        with open("server/detection/Detection_1_2/classes.txt") as f:
+            classes = [line.strip() for line in f.readlines()]
+
+        # Initialize variables
+        total_amount = 0
+        detected_objects = []
+        frames_to_live = 30
+        cap = cv2.VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM),format=NV12,width=640,height=480,framerate=30/1 ! nvvidconv ! video/x-raw,format=BGRx ! videoconvert ! video/x-raw,format=BGR ! appsink drop=1", cv2.CAP_GSTREAMER)
+        process_frame = False
+        target_reached = False
+        
+        while not target_reached:
+            ret, frame = cap.read()
             if process_frame:
-                process_frame = False
-                ret, frame = cap.read()
-
+                    process_frame = False
+                    ret, frame = cap.read()
             if ret:
                 # Convert frame to a blob to feed into YOLOv3
                 blob = cv2.dnn.blobFromImage(frame, 1 / 255.0, (416, 416), swapRB=True, crop=False)
@@ -113,12 +129,33 @@ def detect_cash(target_amount):
         cv2.putText(frame, "Total amount: ${:.2f}".format(total_amount), (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
         cv2.putText(frame, "Amount needed: ${:.2f}".format(target_amount - total_amount), (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
         cv2.putText(frame, "Press 'd' to detect, 'q' to add coins", (10, 150), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
-            # Display the frame
-        cv2.imshow("Cash Detection", frame)
 
     # Release the camera and close all windows
-    cap.release()
-    cv2.destroyAllWindows()
-    return total_amount
+        cap.release()
+        cv2.destroyAllWindows()
 
+    window = tk.Tk()
+    window.title("Cash Detection")
+
+    frame_label = tk.Label(window)  # Rename the variable to avoid confusion
+    frame_label.pack()
+
+    control_frame = tk.Frame(window)
+    control_frame.pack()
+
+    detect_button = tk.Button(control_frame, text="Detect", command=on_detect_click)
+    detect_button.pack(side="left")
+
+    quit_button = tk.Button(control_frame, text="Quit", command=on_quit_click)
+    quit_button.pack(side="left")
+
+    detection_thread = Thread(target=run_detection)
+    detection_thread.start()
+
+    update_image_thread = Thread(target=update_image_label)
+    update_image_thread.start()
+
+    window.mainloop()
+
+    return total_amount
 

@@ -206,8 +206,6 @@ class CashRegisterApp(tk.Tk):
         except subprocess.CalledProcessError as e:
             messagebox.showerror("Error", f"An error occurred while running main.py: {e}")
 
-
-
     def load_password(self):
         conn = sqlite3.connect("cash_register.db")
         cursor = conn.cursor()
@@ -335,7 +333,7 @@ class CashRegisterApp(tk.Tk):
         self.item_buttons_frame = tk.Frame(self.item_page)
         self.create_item_buttons()
         self.item_buttons_frame.grid(row=2, column=0, padx=20, pady=20)
-        
+
     def update_item_listbox(self):
         self.item_listbox.delete(0, tk.END)
         for item in self.items:
