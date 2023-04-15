@@ -4,7 +4,7 @@ from calc import calculate_change, display_images, load_bill_and_coin_images
 import open_cash_box
 
 def main():
-    target_amount = float(input("Please enter price in $00.00 format $").replace('$', ''))
+   
     total_amount = detect_cash(target_amount)
     print("Total amount after bills detection: ${:.2f}".format(total_amount))
 
@@ -35,5 +35,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+    target_amount=float(sys.argv[1])
+    main(target_amount)
 

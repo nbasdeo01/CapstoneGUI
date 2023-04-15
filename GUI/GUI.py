@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 import sqlite3
 from PIL import Image, ImageTk
+import subprocess
 
 class CashRegisterApp(tk.Tk):
     def __init__(self):
@@ -181,12 +182,14 @@ class CashRegisterApp(tk.Tk):
         conn.close()
 
     def process_payment(self):
-        transaction_data = "\n".join(self.cart.get(0, tk.END))
-        total = self.total
-        self.save_transaction(transaction_data, total)
-        messagebox.showinfo("Payment", f"Payment of ${self.total:.2f} received.")
-        self.cart.delete(0, tk.END)
-        self.clear()
+        try:
+            main_py_path = "C:\\Users\\Andre\\CapstoneGUI\\Cash_Detection\\main.py"
+            subprocess.run(["python", main_py_path, str(self.total)], check=True)
+            self.clear_items()
+        except subprocess.CalledProcessError as e:
+            messagebox.showerror("Error", f"An error occurred while running main.py: {e}")
+
+
 
     def load_password(self):
         conn = sqlite3.connect("cash_register.db")
