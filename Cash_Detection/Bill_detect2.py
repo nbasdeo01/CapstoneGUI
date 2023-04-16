@@ -45,16 +45,17 @@ def detect_cash(target_amount):
             iou = intersection_area / union_area
             return iou
         # Load YOLOv3 network
-        net = cv2.dnn.readNetFromDarknet("server/detection/Detection_1_2/yolov3-tiny_testing.cfg", "server/detection/Detection_1_2/yolov3-tiny_training_final.weights")
+        net = cv2.dnn.readNetFromDarknet("Cash_Detection/yolov3-tiny_testing.cfg", "Cash_Detection/yolov3-tiny_training_final.weights")
 
         # Load list of classes
-        with open("server/detection/Detection_1_2/classes.txt") as f:
+        with open("Cash_Detection/classes.txt") as f:
             classes = [line.strip() for line in f.readlines()]
 
         # Initialize variables
         total_amount = 0
         detected_objects = []
         frames_to_live = 30
+        #cap = cv2.VideoCapture(0)
         cap = cv2.VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM),format=NV12,width=640,height=480,framerate=30/1 ! nvvidconv ! video/x-raw,format=BGRx ! videoconvert ! video/x-raw,format=BGR ! appsink drop=1", cv2.CAP_GSTREAMER)
         process_frame = False
         target_reached = False
@@ -158,4 +159,4 @@ def detect_cash(target_amount):
     window.mainloop()
 
     return total_amount
-
+detect_cash(10)
