@@ -9,21 +9,23 @@ def detect_cash(target_amount):
     target_reached = False
     frame_label = None
     window = None
+    running = True
     total_amount = 0
     def on_detect_click():
         global process_frame
         process_frame = True
 
     def on_quit_click():
-        global target_reached
+        global target_reached, running
         target_reached = True
+        running = False
         if cap is not None:
             cap.release()
         window.destroy()
 
     def update_image_label():
         global frame_label, photo
-        while not target_reached:
+        while not target_reached and running:
             if cap is not None:
                 _, cv_frame = cap.read()
                 image = Image.fromarray(cv2.cvtColor(cv_frame, cv2.COLOR_BGR2RGB))
@@ -58,12 +60,12 @@ def detect_cash(target_amount):
         total_amount = 0
         detected_objects = []
         frames_to_live = 30
-        #cap = cv2.VideoCapture(0)
-        cap = cv2.VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM),format=NV12,width=640,height=480,framerate=30/1 ! nvvidconv ! video/x-raw,format=BGRx ! videoconvert ! video/x-raw,format=BGR ! appsink drop=1", cv2.CAP_GSTREAMER)
+        cap = cv2.VideoCapture(0)
+        #cap = cv2.VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM),format=NV12,width=640,height=480,framerate=30/1 ! nvvidconv ! video/x-raw,format=BGRx ! videoconvert ! video/x-raw,format=BGR ! appsink drop=1", cv2.CAP_GSTREAMER)
         process_frame = False
         target_reached = False
         
-        while not target_reached:
+        while not target_reached and running:
             ret, frame = cap.read()
             if process_frame:
                     process_frame = False
