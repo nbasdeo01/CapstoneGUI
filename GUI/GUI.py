@@ -146,7 +146,8 @@ class CashRegisterApp(tk.Tk):
         if not os.path.exists(save_directory):
             os.makedirs(save_directory)
         # Open the camera
-        cap = cv2.VideoCapture(0)
+        #cap = cv2.VideoCapture(0)
+        cap = cv2.VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM),format=NV12,width=640,height=480,framerate=30/1 ! nvvidconv ! video/x-raw,format=BGRx ! videoconvert ! video/x-raw,format=BGR ! appsink drop=1", cv2.CAP_GSTREAMER)
 
         while True:
             # Capture frame-by-frame
