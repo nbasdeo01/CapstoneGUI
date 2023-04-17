@@ -32,7 +32,6 @@ class CashRegisterApp(tk.Tk):
         self.load_password()
         self.create_cart()
         self.create_remove_button()
-        self.capture_image()
         self.cash_register_page.grid_remove()
         self.admin_page.grid_remove()
         # Center the application on the screen
