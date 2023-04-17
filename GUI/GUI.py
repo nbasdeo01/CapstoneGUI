@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 import sqlite3
 import subprocess
 import os
@@ -8,6 +9,9 @@ from tkinter import messagebox
 from PIL import Image, ImageTk
 from gtts import gTTS
 from playsound import playsound
+import cv2
+import os
+import uuid
 
 class CashRegisterApp(tk.Tk):
     def __init__(self):
@@ -28,6 +32,7 @@ class CashRegisterApp(tk.Tk):
         self.load_password()
         self.create_cart()
         self.create_remove_button()
+        self.capture_image()
         self.cash_register_page.grid_remove()
         self.admin_page.grid_remove()
         # Center the application on the screen
@@ -63,6 +68,7 @@ class CashRegisterApp(tk.Tk):
             ("Chips", 1.50, chips_image),
             ("Soda", 2.00, soda_image),
         ]
+        self.item_buttons = []
 
         # Create buttons for each item
         for i, (item_name, item_price, item_image) in enumerate(self.items):
@@ -112,8 +118,118 @@ class CashRegisterApp(tk.Tk):
         self.transactions_button = tk.Button(self.cash_register_page, text="Transactions", font=("Open Sans", 16), command=self.show_transactions, bg="#4CAF50", fg="#FFFFFF", relief="groove", borderwidth=2)
         self.transactions_button.grid(row=3, column=2, padx=20, pady=10, ipadx=20, ipady=10)
 
+        # Place this code within your create_cash_register_page() function
+        add_item_label = tk.Label(self.cash_register_page, text="Add New Item", font=("Open Sans", 16))
+        add_item_label.grid(row=5, column=0, pady=10)
+
+        # Item name entry
+        item_name_entry = ttk.Entry(self.cash_register_page)
+        item_name_entry.grid(row=5, column=1, pady=10)
+
+        # Item price entry
+        item_price_entry = ttk.Entry(self.cash_register_page)
+        item_price_entry.grid(row=6, column=1, pady=10)
+
+        # Item image path entry
+        item_image_entry = ttk.Entry(self.cash_register_page)
+        item_image_entry.grid(row=7, column=1, pady=10)
+
+        # Add item button
+        add_item_button = tk.Button(self.cash_register_page, text="Add Item", font=("Open Sans", 16), command=lambda: self.add_item_to_db(item_name_entry.get(), item_price_entry.get(), item_image_entry.get()))
+        add_item_button.grid(row=8, column=1, pady=10)
+
         # Initialize total
         self.total = 0.0
+        self.update_items()
+
+    def capture_image(self, save_directory="GUI/item_images"):
+        # Create the save directory if it doesn't exist
+        if not os.path.exists(save_directory):
+            os.makedirs(save_directory)
+        # Open the camera
+        cap = cv2.VideoCapture(0)
+
+        while True:
+            # Capture frame-by-frame
+            ret, frame = cap.read()
+
+            # Display the resulting frame
+            cv2.imshow("Press spacebar to take a photo, 'q' to exit", frame)
+
+            key = cv2.waitKey(1) & 0xFF
+
+            # If the spacebar is pressed, save the image and break the loop
+            if key == ord(" "):
+                # Generate a unique file name and save the image
+                file_name = f"{uuid.uuid4().hex}.png"
+                file_path = os.path.join(save_directory, file_name)
+                cv2.imwrite(file_path, frame)
+                break
+            # If 'q' is pressed, exit without saving the image
+            elif key == ord("q"):
+                file_path = None
+                break
+
+        # Release the camera and close the window
+        cap.release()
+        cv2.destroyAllWindows()
+
+        return file_path
+    
+    def add_item_to_db(self, item_name, item_price, image_path):
+        image_path = self.capture_image()
+
+        if image_path is None:
+            messagebox.showerror("Error", "No image captured")
+            return
+        # Insert the new item into the database
+        conn = sqlite3.connect("cash_register.db")
+        cursor = conn.cursor()
+        
+        cursor.execute("INSERT INTO items (name, price, image_path) VALUES (?, ?, ?)", (item_name, item_price, image_path))
+        
+        conn.commit()
+        conn.close()
+
+        # Update the GUI with the new item
+        self.update_items()
+
+    def update_items(self):
+        conn = sqlite3.connect("cash_register.db")
+        cursor = conn.cursor()
+        
+        cursor.execute("SELECT name, price, image_path FROM items")
+        self.items = []
+        for name, price, image_path in cursor.fetchall():
+            try:
+                item_image = ImageTk.PhotoImage(Image.open(image_path).resize((150, 150)))
+            except Exception as e:
+                messagebox.showerror("Error", f"Cannot open image for item {name}: {e}")
+                continue  # Skip this item and move to the next one
+
+            self.items.append((name, price, item_image))
+
+        conn.close()
+
+        # Clear the current buttons
+        for button in self.item_buttons:
+            button.destroy()
+
+        # Create buttons for each item
+        self.item_buttons = []
+        for i, (item_name, item_price, item_image) in enumerate(self.items):
+            button = tk.Button(
+                self.cash_register_page,
+                text=f"{item_name}\n${item_price:.2f}",
+                font=("Open Sans", 20),
+                command=lambda price=item_price, name=item_name: self.add_item_price(price, name),
+                image=item_image,
+                compound="top",
+                width=200, height=200,
+            )
+            button.image = item_image
+            button.grid(row=i // 3, column=i % 3, padx=10, pady=10)
+            self.item_buttons.append(button)
 
     def show_transactions(self):
         self.cash_register_page.grid_remove()
