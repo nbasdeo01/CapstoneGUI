@@ -115,7 +115,7 @@ class CashRegisterApp(tk.Tk):
         self.add_user_button.grid_remove()  # Hide the button initially
 
         # Access Transactions Page button
-        self.transactions_button = tk.Button(self.cash_register_page, text="Transactions", font=("Open Sans", 16), command=self.show_transactions, bg="#4CAF50", fg="#FFFFFF", relief="groove", borderwidth=2)
+        self.transactions_button = tk.Button(self.cash_register_page, text="Transactions", font=("Open Sans", 16), command=self.process_payment, bg="#4CAF50", fg="#FFFFFF", relief="groove", borderwidth=2)
         self.transactions_button.grid(row=3, column=2, padx=20, pady=10, ipadx=20, ipady=10)
 
         # Place this code within your create_cash_register_page() function
@@ -380,7 +380,7 @@ class CashRegisterApp(tk.Tk):
     def est_now(self):
         utc_now = datetime.datetime.now(datetime.timezone.utc)
         est = pytz.timezone('US/Eastern')
-        return utc_now.astimezone(est).strftime('%Y-%m-%d %H:%M:%S')
+        return utc_now.astimezone(est).strftime('%Y-%m-%d "|" %H:%M:%S')
 
     def insert_transaction(self, transaction_data, total):
         conn = sqlite3.connect("cash_register.db")
