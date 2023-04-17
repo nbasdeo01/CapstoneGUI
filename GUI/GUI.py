@@ -11,15 +11,15 @@ class CashRegisterApp(tk.Tk):
         self.geometry("1024x600") 
         self.attributes("-fullscreen", True)
         self.bind("<Escape>", self.exit_fullscreen)
-
- 
+        self.passwords = self.load_passwords()
         self.correct_passcode = "1234" 
         self.admin_page = tk.Frame(self)
         self.passcode_page = tk.Frame(self)
+        self.create_database()
+        self.create_items_table()
         self.create_passcode_page()
         self.create_cash_register_page()
         self.create_admin_page()
-        self.create_database()
         self.load_password()
         self.create_cart()
         self.create_remove_button()
@@ -39,6 +39,13 @@ class CashRegisterApp(tk.Tk):
         self.attributes("-fullscreen", False)
         self.geometry("1024x600")
 
+    def load_passwords(self):
+            conn = sqlite3.connect("cash_register.db")
+            cursor = conn.cursor()
+            cursor.execute("SELECT password FROM passwords")
+            passwords = [row[0] for row in cursor.fetchall()]
+            conn.close()
+            return passwords
 
     def back_to_passcode_page(self):
         self.admin_page.grid_remove()
@@ -139,8 +146,6 @@ class CashRegisterApp(tk.Tk):
         self.passcode_entry = tk.Entry(self.passcode_page, font=("Open Sans", 18), show="*", width=10, relief="groove", borderwidth=2)
         self.passcode_entry.grid(row=1, column=1, padx=20, pady=10)
 
-        
-
         # Keypad buttons
         buttons = [
             ("1", 2, 0),
@@ -188,6 +193,10 @@ class CashRegisterApp(tk.Tk):
         cursor.execute("CREATE TABLE IF NOT EXISTS passwords (name TEXT PRIMARY KEY, password TEXT)")
         cursor.execute("INSERT OR IGNORE INTO passwords (name, password) VALUES (?, ?)", ("default", self.correct_passcode))
         cursor.execute("CREATE TABLE IF NOT EXISTS transactions (id INTEGER PRIMARY KEY AUTOINCREMENT, transaction_data TEXT, total REAL, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)")
+        cursor.execute("""CREATE TABLE IF NOT EXISTS items (
+                        name TEXT,
+                        price REAL
+                    )""")
         conn.commit()
         conn.close()
 
@@ -242,19 +251,27 @@ class CashRegisterApp(tk.Tk):
         admin_password = "1111"  # Set your desired admin password here
         entered_passcode = self.passcode_entry.get()
 
-        if entered_passcode == self.correct_passcode:
-            self.passcode_page.grid_remove()
-            self.cash_register_page.grid()
-            return True
-        elif entered_passcode == admin_password:
+        # Check if entered password is admin password
+        if entered_passcode == admin_password:
             self.passcode_page.grid_remove()
             self.admin_page.grid()
             return True
         else:
+            conn = sqlite3.connect("cash_register.db")
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM passwords")
+            rows = cursor.fetchall()
+            conn.close()
+
+            for row in rows:
+                if entered_passcode == row[1]:  # Assuming the password is stored in the second column of the row
+                    self.passcode_page.grid_remove()
+                    self.cash_register_page.grid()
+                    return True
+
             messagebox.showerror("Error", "Incorrect passcode, please try again.")
             self.passcode_entry.delete(0, tk.END)
             return False
-
 
     def submit_passcode(self):
         if self.check_passcode():
@@ -303,28 +320,56 @@ class CashRegisterApp(tk.Tk):
         self.new_item_price_entry.grid(row=2, column=2, padx=10, pady=10)
 
         # Add item button
-        self.add_item_button = tk.Button(self.admin_page, text="Add Item", font=("Open Sans", 16), command=self.add_item)
+        self.add_item_button = tk.Button(self.admin_page, text="Add Item", font=("Open Sans", 16), command=lambda: self.add_item(self))
         self.add_item_button.grid(row=3, column=1, padx=10, pady=10, columnspan=2)
 
         # Passcode Management
         self.admin_label = tk.Label(self.admin_page, text="Enter new passcode:")
-        self.admin_label.grid(row=4, column=1, padx=10, pady=10)
+        self.admin_label.grid(row=4, column=0, padx=10, pady=10, sticky='e')
         self.admin_entry = tk.Entry(self.admin_page, font=("Open Sans", 16), show="*", width=10)
-        self.admin_entry.grid(row=4, column=2, padx=10, pady=10)
+        self.admin_entry.grid(row=4, column=1, padx=10, pady=10, sticky='w')
 
         # Update passcode button
-        self.update_passcode_button = tk.Button(self.admin_page, text="Update Passcode", font = ("Open Sans", 16), command=self.change_password)
-        self.update_passcode_button.grid(row=5, column=1, padx=10, pady=10, columnspan=2)
+        self.update_passcode_button = tk.Button(self.admin_page, text="Update Passcode", font=("Open Sans", 16), command=self.change_password)
+        self.update_passcode_button.grid(row=5, column=0, padx=10, pady=10, columnspan=2)
+
+        # Non-admin password management
+        self.non_admin_password_label = tk.Label(self.admin_page, text="Enter new non-admin password:", font=("Open Sans", 16), bg="#FFFFFF", fg="#000000")
+        self.non_admin_password_label.grid(row=6, column=0, padx=10, pady=10, sticky='e')
+        self.non_admin_password_entry = tk.Entry(self.admin_page, font=("Open Sans", 16), show="*", width=10)
+        self.non_admin_password_entry.grid(row=6, column=1, padx=10, pady=10, sticky='w')
+
+        # Add non-admin password button
+        self.add_non_admin_password_button = tk.Button(self.admin_page, text="Add Non-admin Password", font=("Open Sans", 16), command=self.add_non_admin_password)
+        self.add_non_admin_password_button.grid(row=7, column=0, padx=10, pady=10, columnspan=2)
 
         # Logout button
         self.logout_button_admin = tk.Button(self.admin_page, text="Logout", font=("Open Sans", 16), command=self.logout, bg="#FF5722", fg="#FFFFFF", relief="groove", borderwidth=2)
         self.logout_button_admin.grid(row=6, column=1, padx=10, pady=10, columnspan=2)
 
+    def add_non_admin_password(self):
+        new_password = self.non_admin_entry.get()
+        if len(new_password) > 0:
+            conn = sqlite3.connect("cash_register.db")
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO passwords (password) VALUES (?)", (new_password,))
+            conn.commit()
+            conn.close()
+            messagebox.showinfo("Success", "Non-admin password added successfully.")
+            self.non_admin_entry.delete(0, tk.END)
+        else:
+            messagebox.showerror("Error", "Please enter a valid password.")
+
     def populate_item_listbox(self):
-        self.item_listbox.delete(0, tk.END)
-        for item in self.items:
-            item_name, item_price = item[:2]
-            self.item_listbox.insert(tk.END, f"{item_name} - ${item_price:.2f}")
+        conn = sqlite3.connect("cash_register.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT name, price FROM items")
+        items = cursor.fetchall()
+        conn.close()
+
+        for item in items:
+            item_name = item[0]
+            self.item_listbox.insert(tk.END, item_name)
 
     def update_item_buttons(self):
         self.populate_item_listbox()
@@ -345,26 +390,40 @@ class CashRegisterApp(tk.Tk):
                 continue
             self.item_listbox.insert(tk.END, f"{item_name} - ${item_price:.2f}")
 
-    def add_item(self):
+    def add_item(self, cash_register):
         item_name = self.new_item_name_entry.get()
-        item_price = float(self.new_item_price_entry.get())
+        item_price = self.new_item_price_entry.get()
 
-        # Check if the item already exists
-        for existing_item in self.items:
-            if existing_item[0] == item_name:
-                messagebox.showerror("Error", "Item already exists.")
-                return
+        if len(item_name) > 0 and len(item_price) > 0:
+            try:
+                price = float(item_price)
 
-        # Add item to the items list
-        self.items.append((item_name, item_price))
+                # Check if the item already exists in the database
+                conn = sqlite3.connect("cash_register.db")
+                cursor = conn.cursor()
+                cursor.execute("SELECT name FROM items WHERE name=?", (item_name,))
+                existing_item = cursor.fetchone()
 
-        # Update item buttons
-        self.update_item_buttons()
-        self.update_item_listbox()
+                if existing_item is not None:
+                    messagebox.showerror("Error", "Item already exists.")
+                    return
 
-        # Clear the input fields
-        self.new_item_name_entry.delete(0, tk.END)
-        self.new_item_price_entry.delete(0, tk.END)
+                # Add item to the database
+                cursor.execute("INSERT INTO items (name, price) VALUES (?, ?)", (item_name, price))
+                conn.commit()
+                conn.close()
+
+                messagebox.showinfo("Success", "Item added successfully.")
+                self.new_item_name_entry.delete(0, tk.END)
+                self.new_item_price_entry.delete(0, tk.END)
+            except ValueError:
+                messagebox.showerror("Error", "Please enter a valid price.")
+        else:
+            messagebox.showerror("Error", "Please enter a valid item name and price.")
+
+        cash_register.refresh_item_buttons()
+        self.populate_item_listbox()
+
 
     def edit_item(self):
         old_item_name = self.edit_item_name_entry.get()
@@ -387,24 +446,55 @@ class CashRegisterApp(tk.Tk):
                 return
 
         messagebox.showerror("Error", "Item not found.")
+        self.populate_item_listbox()
 
     def delete_item(self):
-        item_name = self.delete_item_name_entry.get()
+        item_name = self.delete_item_name_entry.get().strip()
 
-        # Find the item in the list
-        for i, item in enumerate(self.items):
-            if item[0].strip() == item_name.strip():
-                # Remove the item from the list
-                self.items.pop(i)
+        if len(item_name) == 0:
+            messagebox.showerror("Error", "Item name cannot be empty.")
+            return
 
-                # Update item buttons
-                self.update_item_buttons()
+        # Check if the item exists in the database
+        conn = sqlite3.connect("cash_register.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT name FROM items WHERE TRIM(name) = ?", (item_name,))
+        result = cursor.fetchone()
 
-                # Clear the input field
-                self.delete_item_name_entry.delete(0, tk.END)
-                return
+        if result:
+            # Delete the item from the database
+            cursor.execute("DELETE FROM items WHERE TRIM(name) = ?", (item_name,))
+            conn.commit()
 
-        messagebox.showerror("Error", "Item not found.")
+            # Update the item listbox
+            self.populate_item_listbox()
+
+            # Clear the delete item entry field
+            self.delete_item_name_entry.delete(0, tk.END)
+        else:
+            messagebox.showerror("Error", "Item not found.")
+
+        conn.close()
+
+    def refresh_item_buttons(self):
+        # Remove all existing buttons
+        for button in self.item_buttons:
+            button.grid_remove()
+
+        # Fetch items from the database
+        conn = sqlite3.connect("cash_register.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT name, price FROM items")
+        items = cursor.fetchall()
+        conn.close()
+
+        # Create buttons for each item
+        self.item_buttons = []
+        for index, item in enumerate(items):
+            item_name = item[0]
+            item_price = item[1]
+            button = tk.Button(self.item_buttons_frame, text=item_name, font=("Open Sans", 16), command=lambda item_name=item_name, item_price=item_price: self.add_to_order(item_name, item_price))
+            button
 
 
     def change_password(self):
@@ -427,6 +517,21 @@ class CashRegisterApp(tk.Tk):
         self.cash_register_page.grid_remove()
         self.passcode_page.grid()
         self.passcode_entry.delete(0, tk.END)
+
+    def create_items_table(self):
+        conn = sqlite3.connect("cash_register.db")
+        cursor = conn.cursor()
+
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS items (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL UNIQUE,
+            price REAL NOT NULL
+        )
+        """)
+
+        conn.commit()
+        conn.close()
 
 if __name__ == "__main__":
     app = CashRegisterApp()
