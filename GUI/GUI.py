@@ -3,6 +3,9 @@ from tkinter import messagebox
 import sqlite3
 from PIL import Image, ImageTk
 import subprocess
+from gtts import gTTS
+from playsound import playsound
+import os
 
 class CashRegisterApp(tk.Tk):
     def __init__(self):
@@ -39,7 +42,6 @@ class CashRegisterApp(tk.Tk):
         self.attributes("-fullscreen", False)
         self.geometry("1024x600")
 
-
     def back_to_passcode_page(self):
         self.admin_page.grid_remove()
         self.passcode_page.grid()
@@ -47,13 +49,12 @@ class CashRegisterApp(tk.Tk):
     def clear_passcode_entry(self):
         self.passcode_entry.delete(0, 'end')
 
-
     def create_cash_register_page(self):
         self.cash_register_page = tk.Frame(self, bg="#F5F5F5")
         self.cash_register_page.grid(row=0, column=0, sticky="nsew")
-        water_image = ImageTk.PhotoImage(Image.open("GUI/item1.png").resize((150, 150)))
-        chips_image = ImageTk.PhotoImage(Image.open("GUI/item2.png").resize((150, 150)))
-        soda_image = ImageTk.PhotoImage(Image.open("GUI/item3.png").resize((150, 150)))
+        water_image = ImageTk.PhotoImage(Image.open("GUI/item_images/item1.png").resize((150, 150)))
+        chips_image = ImageTk.PhotoImage(Image.open("GUI/item_images/item2.png").resize((150, 150)))
+        soda_image = ImageTk.PhotoImage(Image.open("GUI/item_images/item3.png").resize((150, 150)))
 
         # Create a list of items with their respective prices
         self.items = [
@@ -78,12 +79,12 @@ class CashRegisterApp(tk.Tk):
 
 
         # Total label and display
-        self.total_label = tk.Label(self.cash_register_page, text="Total:", font=("Open Sans", 18), bg="#F5F5F5", fg="#333333")
-        self.total_label.grid(row=3, column=0, padx=20, pady=20)
+        # self.total_label = tk.Label(self.cash_register_page, text="Total:", font=("Open Sans", 18), bg="#F5F5F5", fg="#333333")
+        # self.total_label.grid(row=3, column=0, padx=20, pady=20)
         self.total_var = tk.StringVar()
         self.total_var.set("0.00")
-        self.total_display = tk.Label(self.cash_register_page, textvariable=self.total_var, font=("Open Sans", 16), width=10, bg="#FFFFFF", relief="groove", borderwidth=2)
-        self.total_display.grid(row=3, column=1, padx=20, pady=20)
+        # self.total_display = tk.Label(self.cash_register_page, textvariable=self.total_var, font=("Open Sans", 16), width=10, bg="#FFFFFF", relief="groove", borderwidth=2)
+        # self.total_display.grid(row=3, column=1, padx=20, pady=20)
 
         # Pay button
         self.pay_button = tk.Button(self.cash_register_page, text="Pay", font=("Open Sans", 16), command=self.process_payment, bg="#2196F3", fg="#FFFFFF", relief="groove", borderwidth=2)
@@ -97,6 +98,9 @@ class CashRegisterApp(tk.Tk):
         self.logout_button = tk.Button(self.cash_register_page, text="Logout", font=("Open Sans", 16), command=self.logout, bg="red", fg = "white")
         self.logout_button.grid(row=4, column=2, padx=20, pady=20, ipadx=20, ipady=10)
 
+        # Read Cart button
+        self.read_cart_button = tk.Button(self.cash_register_page, text="Read Cart", font=("Open Sans", 16), command=self.read_cart_description, bg="#4CAF50", fg="#FFFFFF", relief="groove", borderwidth=2)
+        self.read_cart_button.grid(row=3, column=0, padx=20, pady=20, ipadx=20, ipady=10)
 
         # Initialize total
         self.total = 0.0
@@ -104,6 +108,20 @@ class CashRegisterApp(tk.Tk):
     def create_cart(self):
         self.cart = tk.Listbox(self.cash_register_page, font=("Open Sans", 20), height=10, width=10)
         self.cart.grid(row=0, column=3, rowspan=3, padx=20, pady=20)
+
+    def read_cart_description(self):
+        cart_items = self.cart.get(0, 'end')
+        if len(cart_items) == 0:
+            speech = "The cart is currently empty."
+        else:
+            speech = "The cart contains: "
+            for item in cart_items:
+                speech += f"{item}, "
+
+        tts = gTTS(speech, lang='en')
+        tts.save("cart_description.mp3")
+        playsound("cart_description.mp3")
+        os.remove("cart_description.mp3")
 
     def create_remove_button(self):
         remove_label = tk.Label(self.cash_register_page, text="Tap an item in the cart\nto remove it", font=("Open Sans", 16), bg="#F5F5F5", fg="#333333")
@@ -138,8 +156,6 @@ class CashRegisterApp(tk.Tk):
         self.passcode_label.grid(row=0, column=1, padx=20, pady=(50, 10))
         self.passcode_entry = tk.Entry(self.passcode_page, font=("Open Sans", 18), show="*", width=10, relief="groove", borderwidth=2)
         self.passcode_entry.grid(row=1, column=1, padx=20, pady=10)
-
-        
 
         # Keypad buttons
         buttons = [
