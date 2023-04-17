@@ -14,10 +14,10 @@ class CashRegisterApp(tk.Tk):
         self.geometry("1024x600") 
         self.attributes("-fullscreen", True)
         self.bind("<Escape>", self.exit_fullscreen)
- 
         self.correct_passcode = "1234" 
         self.admin_page = tk.Frame(self)
         self.passcode_page = tk.Frame(self)
+        self.create_add_passcode_page()
         self.create_passcode_page()
         self.create_cash_register_page()
         self.create_admin_page()
@@ -27,7 +27,6 @@ class CashRegisterApp(tk.Tk):
         self.create_remove_button()
         self.cash_register_page.grid_remove()
         self.admin_page.grid_remove()
-
         # Center the application on the screen
         self.update_idletasks()
         screen_width = self.winfo_screenwidth()
@@ -90,7 +89,7 @@ class CashRegisterApp(tk.Tk):
         self.pay_button.grid(row=4, column=0, padx=20, pady=20, ipadx=30, ipady=10)
 
         # Clear button
-        self.clear_button = tk.Button(self.cash_register_page, text="Clear", font=("Open Sans", 20), command=self.clear_items, bg="#FF5722", fg="#FFFFFF", relief="groove", borderwidth=2)
+        self.clear_button = tk.Button(self.cash_register_page, text="Clear", font=("Open Sans", 16), command=self.clear_items, bg="#FF5722", fg="#FFFFFF", relief="groove", borderwidth=2)
         self.clear_button.grid(row=4, column=1, padx=20, pady=20, ipadx=20, ipady=10)
 
         # Logout button
@@ -101,8 +100,24 @@ class CashRegisterApp(tk.Tk):
         self.read_cart_button = tk.Button(self.cash_register_page, text="Read Cart", font=("Open Sans", 16), command=self.read_cart_description, bg="#4CAF50", fg="#FFFFFF", relief="groove", borderwidth=2)
         self.read_cart_button.grid(row=3, column=0, padx=20, pady=20, ipadx=20, ipady=10)
 
+        # Access Add Passcode Page
+        self.add_user_button = tk.Button(self.cash_register_page, text="Add User", font=("Open Sans", 16), command=self.show_add_passcode_page, bg="#4CAF50", fg="#FFFFFF", relief="groove", borderwidth=2)
+        self.add_user_button.grid(row=3, column=1, padx=20, pady=20, ipadx=20, ipady=10)
+        self.add_user_button.grid_remove()  # Hide the button initially
+
         # Initialize total
         self.total = 0.0
+
+    def create_add_passcode_page(self):
+        self.add_passcode_page = tk.Frame(self)
+        self.add_passcode_page.grid(row=0, column=0, sticky="nsew")
+        tk.Label(self.add_passcode_page, text="Add User", font=("Arial", 24)).grid(row=0, column=0, pady=20)
+        tk.Label(self.add_passcode_page, text="Enter a 4-digit Code: ", font=("Arial", 14)).grid(row=1, column=0, pady=5)
+        self.new_passcode_entry = tk.Entry(self.add_passcode_page, font=("Arial", 14))
+        self.new_passcode_entry.grid(row=1, column=1, pady=5)
+        tk.Button(self.add_passcode_page, text="Add", font=("Arial", 14), command=self.add_passcode).grid(row=2, column=0, columnspan=2, pady=5)
+        tk.Button(self.add_passcode_page, text="Back", font=("Arial", 14), command=self.back_to_cash_register_page).grid(row=3, column=0, columnspan=2, pady=5)
+        self.add_passcode_page.grid_remove()
 
     def create_cart(self):
         self.cart = tk.Listbox(self.cash_register_page, font=("Open Sans", 20), height=10, width=10)
@@ -201,7 +216,7 @@ class CashRegisterApp(tk.Tk):
         conn = sqlite3.connect("cash_register.db")
         cursor = conn.cursor()
         cursor.execute("CREATE TABLE IF NOT EXISTS passwords (name TEXT PRIMARY KEY, password TEXT)")
-        cursor.execute("INSERT OR IGNORE INTO passwords (name, password) VALUES (?, ?)", ("default", self.correct_passcode))
+        cursor.execute("INSERT OR IGNORE INTO passwords (name, password) VALUES (?, ?)", ("passcode1", self.correct_passcode))
         cursor.execute("CREATE TABLE IF NOT EXISTS transactions (id INTEGER PRIMARY KEY AUTOINCREMENT, transaction_data TEXT, total REAL, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)")
         conn.commit()
         conn.close()
@@ -224,7 +239,7 @@ class CashRegisterApp(tk.Tk):
     def load_password(self):
         conn = sqlite3.connect("cash_register.db")
         cursor = conn.cursor()
-        cursor.execute("SELECT password FROM passwords WHERE name=?", ("default",))
+        cursor.execute("SELECT password FROM passwords WHERE name=?", ("passcode1",))
         self.correct_passcode = cursor.fetchone()[0]
         conn.close()
 
@@ -234,7 +249,7 @@ class CashRegisterApp(tk.Tk):
             self.correct_passcode = new_passcode
             conn = sqlite3.connect("cash_register.db")
             cursor = conn.cursor()
-            cursor.execute("UPDATE passwords SET password=? WHERE name=?", (new_passcode, "default"))
+            cursor.execute("UPDATE passwords SET password=? WHERE name=?", (new_passcode, "passcode1"))
             conn.commit()
             conn.close()
             messagebox.showinfo("Success", "Passcode updated successfully.")
@@ -254,21 +269,53 @@ class CashRegisterApp(tk.Tk):
             self.total_var.set(f"${self.total:.2f}")
 
     def check_passcode(self):
-        admin_password = "1111"  # Set your desired admin password here
+        admin_password = "0000"  # Set your desired admin password here
         entered_passcode = self.passcode_entry.get()
-        if entered_passcode == self.correct_passcode:
-            self.passcode_page.grid_remove()
-            self.cash_register_page.grid()
-            return True
-        elif entered_passcode == admin_password:
-            self.passcode_page.grid_remove()
-            self.admin_page.grid()
-            return True
+        conn = sqlite3.connect("cash_register.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM passwords WHERE password=?", (entered_passcode,))
+        result = cursor.fetchone()
+        conn.close()
+        if result is not None:
+            if entered_passcode == admin_password:
+                self.passcode_page.grid_remove()
+                self.admin_page.grid()
+                return True
+            else:
+                self.passcode_page.grid_remove()
+                self.cash_register_page.grid()
+                if entered_passcode == "1234":
+                    self.add_user_button.grid()  # Show the "Add User" button for the "1234" user
+                else:
+                    self.add_user_button.grid_remove()  # Hide the "Add User" button for other users
+                return True
         else:
             messagebox.showerror("Error", "Incorrect passcode, please try again.")
             self.passcode_entry.delete(0, tk.END)
             return False
+        
+    def show_add_passcode_page(self):
+        self.cash_register_page.grid_remove()
+        self.add_passcode_page.grid()
 
+    def back_to_cash_register_page(self):
+        self.add_passcode_page.grid_remove()
+        self.cash_register_page.grid()
+
+    def add_passcode(self):
+        new_passcode = self.new_passcode_entry.get()
+        if len(new_passcode) > 0:
+            conn = sqlite3.connect("cash_register.db")
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO passwords (name, password) VALUES (?, ?)", (f"passcode{new_passcode}", new_passcode))
+            conn.commit()
+            conn.close()
+            messagebox.showinfo("Success", "New user added successfully.")
+            self.new_passcode_entry.delete(0, tk.END)
+            self.back_to_cash_register_page()
+        else:
+            messagebox.showerror("Error", "Please enter a valid passcode.")
+            self.new_passcode_entry.delete(0, tk.END)
 
     def submit_passcode(self):
         if self.check_passcode():
