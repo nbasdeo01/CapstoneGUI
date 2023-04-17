@@ -21,6 +21,7 @@ class CashRegisterApp(tk.Tk):
         self.passcode_page = tk.Frame(self)
         self.create_add_passcode_page()
         self.create_passcode_page()
+        self.create_transactions_page()
         self.create_cash_register_page()
         self.create_admin_page()
         self.create_database()
@@ -102,13 +103,44 @@ class CashRegisterApp(tk.Tk):
         self.read_cart_button = tk.Button(self.cash_register_page, text="Read Cart", font=("Open Sans", 16), command=self.read_cart_description, bg="#4CAF50", fg="#FFFFFF", relief="groove", borderwidth=2)
         self.read_cart_button.grid(row=3, column=0, padx=20, pady=20, ipadx=20, ipady=10)
 
-        # Access Add Passcode Page
+        # Access Add Passcode Page button
         self.add_user_button = tk.Button(self.cash_register_page, text="Add User", font=("Open Sans", 16), command=self.show_add_passcode_page, bg="#4CAF50", fg="#FFFFFF", relief="groove", borderwidth=2)
         self.add_user_button.grid(row=3, column=1, padx=20, pady=20, ipadx=20, ipady=10)
         self.add_user_button.grid_remove()  # Hide the button initially
 
+        # Access Transactions Page button
+        self.transactions_button = tk.Button(self.cash_register_page, text="Transactions", font=("Open Sans", 16), command=self.show_transactions, bg="#4CAF50", fg="#FFFFFF", relief="groove", borderwidth=2)
+        self.transactions_button.grid(row=3, column=2, padx=20, pady=10, ipadx=20, ipady=10)
+
         # Initialize total
         self.total = 0.0
+
+    def show_transactions(self):
+        self.cash_register_page.grid_remove()
+        self.transactions_page.grid()
+        self.transactions_text.delete(1.0, tk.END)
+        transactions = self.get_transactions()
+        for transaction in transactions:
+            self.transactions_text.insert(tk.END, f"ID: {transaction[0]}\nTransaction Data: {transaction[1]}\nTotal: {transaction[2]}\nTimestamp: {transaction[3]}\n\n")
+
+    def get_transactions(self):
+        conn = sqlite3.connect("cash_register.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM transactions")
+        transactions = cursor.fetchall()
+        conn.close()
+        return transactions
+
+    def create_transactions_page(self):
+        self.transactions_page = tk.Frame(self)
+        self.transactions_text = tk.Text(self.transactions_page, wrap=tk.WORD, font=("Open Sans", 12), bg="#F5F5F5", fg="#333333")
+        self.transactions_text.pack(padx=20, pady=20, fill=tk.BOTH, expand=True)
+        back_button = tk.Button(self.transactions_page, text="Back", font=("Open Sans", 12), bg="#FFFFFF", fg="#333333", command=self.hide_transactions_page)
+        back_button.pack(side=tk.BOTTOM, pady=(0, 20))
+
+    def hide_transactions_page(self):
+        self.transactions_page.grid_remove()
+        self.cash_register_page.grid()
 
     def create_add_passcode_page(self):
         self.add_passcode_page = tk.Frame(self)
@@ -133,7 +165,6 @@ class CashRegisterApp(tk.Tk):
             speech = "The cart contains: "
             for item in cart_items:
                 speech += f"{item}, "
-
         tts = gTTS(speech, lang='en')
         tts.save("cart_description.mp3")
         playsound("cart_description.mp3")
@@ -166,11 +197,10 @@ class CashRegisterApp(tk.Tk):
         self.passcode_page.grid(row=0, column=0, sticky="nsew")
         self.passcode_page.columnconfigure(0, weight=1)
         self.passcode_page.columnconfigure(2, weight=1)
-
         # Passcode label and entry
-        self.passcode_label = tk.Label(self.passcode_page, text="Enter passcode:", font=("Open Sans", 28), bg="#F5F5F5", fg="#333333")
+        self.passcode_label = tk.Label(self.passcode_page, text="Enter User ID:", font=("Open Sans", 28), bg="#F5F5F5", fg="#333333")
         self.passcode_label.grid(row=0, column=1, padx=20, pady=(50, 10))
-        self.passcode_entry = tk.Entry(self.passcode_page, font=("Open Sans", 18), show="*", width=10, relief="groove", borderwidth=2)
+        self.passcode_entry = tk.Entry(self.passcode_page, font=("Open Sans", 18), width=10, relief="groove", borderwidth=2)
         self.passcode_entry.grid(row=1, column=1, padx=20, pady=10)
 
         # Keypad buttons
@@ -192,7 +222,7 @@ class CashRegisterApp(tk.Tk):
 
         def on_leave(event):
             event.widget.config(bg="#2196F3")
-
+        
         for button_text, row, column in buttons:
             button = tk.Button(self.passcode_page, text=button_text, font=("Open Sans", 50), command=lambda text=button_text: self.update_passcode_entry(text), bg="#2196F3", fg="#FFFFFF", relief="groove", borderwidth=2)
             button.grid(row=row, column=column, padx=(0, 0) if column != 2 else (0, 0), pady=0, ipadx=135, ipady=30)
@@ -307,8 +337,10 @@ class CashRegisterApp(tk.Tk):
                 self.cash_register_page.grid()
                 if entered_passcode == "1234":
                     self.add_user_button.grid()  # Show the "Add User" button for the "1234" user
+                    self.transactions_button.grid()  # Show the "Transactions" button for the "1234" user
                 else:
                     self.add_user_button.grid_remove()  # Hide the "Add User" button for other users
+                    self.transactions_button.grid_remove()  # Hide the "Transactions" button for other users
                 return True
         else:
             messagebox.showerror("Error", "Incorrect passcode, please try again.")
