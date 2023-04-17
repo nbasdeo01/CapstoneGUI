@@ -21,6 +21,7 @@ class CashRegisterApp(tk.Tk):
         self.attributes("-fullscreen", True)
         self.bind("<Escape>", self.exit_fullscreen)
         self.correct_passcode = "1234" 
+        self.user_password = ""
         self.admin_page = tk.Frame(self)
         self.passcode_page = tk.Frame(self)
         self.create_database()
@@ -134,9 +135,11 @@ class CashRegisterApp(tk.Tk):
         item_image_entry.grid(row=7, column=1, pady=10)
 
         # Add item button
-        add_item_button = tk.Button(self.cash_register_page, text="Add Item", font=("Open Sans", 16), command=lambda: self.add_item_to_db(item_name_entry.get(), item_price_entry.get(), item_image_entry.get()))
-        add_item_button.grid(row=8, column=1, pady=10)
-
+        self.add_item_button = tk.Button(self.cash_register_page, text="Add Item", font=("Open Sans", 16), command=lambda: self.add_item_to_db(item_name_entry.get(), item_price_entry.get(), item_image_entry.get()))
+        if self.correct_passcode == "1234":
+            self.add_item_button.grid(row=5, column=2, padx=20, pady=20, ipadx=20, ipady=10)
+        else:
+            self.add_item_button.grid_remove()
         # Initialize total
         self.total = 0.0
         self.update_items()
@@ -345,7 +348,6 @@ class CashRegisterApp(tk.Tk):
             button.bind("<Enter>", on_enter)
             button.bind("<Leave>", on_leave)
 
-
         # Submit button
         self.submit_button = tk.Button(self.passcode_page, text="Enter", font=("Open Sans", 20), command=self.submit_passcode, bg="#4CAF50", fg="#FFFFFF", relief="groove", borderwidth=2)
         self.submit_button.grid(row=5, column=2, padx=0, pady=0, ipadx=110, ipady=30)
@@ -353,7 +355,6 @@ class CashRegisterApp(tk.Tk):
         # Clear button
         self.clear_button = tk.Button(self.passcode_page, text="Clear", font=("Open Sans", 20), command=self.clear_passcode_entry, bg="#FF5722", fg="#FFFFFF", relief="groove", borderwidth=2)
         self.clear_button.grid(row=5, column=0, padx=0, pady=0, ipadx=110, ipady=30)
-
 
     def update_passcode_entry(self, text):
         current_text = self.passcode_entry.get()
@@ -388,17 +389,16 @@ class CashRegisterApp(tk.Tk):
         conn.commit()
         conn.close()
 
-    def save_transaction(self, transaction_data, total):
-        conn = sqlite3.connect("cash_register.db")
-        cursor = conn.cursor()
-        cursor.execute("INSERT INTO transactions (transaction_data, total) VALUES (?, ?)", (transaction_data, total))
-        conn.commit()
-        conn.close()
-
     def process_payment(self):
         try:
             main_py_path = "//home//jetson//Desktop//CapstoneGUI//Cash_Detection//main.py"
             subprocess.run(["python", main_py_path, str(self.total)], check=True)
+            # Insert the transaction data into the database
+            transaction_data = ", ".join([f"{item[0]} x {item[1]}" for item in self.items])
+            print(f"Transaction data: {transaction_data}")
+            print(f"Total: {self.total}")
+            print(f"Timestamp: {self.est_now()}")
+            self.insert_transaction(transaction_data, self.total)
             self.clear_items()
         except subprocess.CalledProcessError as e:
             messagebox.showerror("Error", f"An error occurred while running main.py: {e}")
@@ -411,11 +411,20 @@ class CashRegisterApp(tk.Tk):
         
         if result:
             self.correct_passcode = result[0]
+            self.user_password = self.correct_passcode
         else:
             self.correct_passcode = None
+            self.user_password = ""
             # Handle the case where no matching record is found, e.g., log an error message, raise an exception, or set a default value.
         
         conn.close()
+
+    def update_add_item_button_visibility(self):
+        if self.user_password == "1234":
+            self.add_item_button.config(command=lambda: self.add_item_to_db(item_name_entry.get(), item_price_entry.get(), item_image_entry.get()))  # Update the command for the Add Item button
+            self.add_item_button.grid(row=5, column=2, padx=20, pady=20, ipadx=20, ipady=10)
+        else:
+            self.add_item_button.grid_remove()
 
     def update_passcode(self):
         new_passcode = self.admin_entry.get()
