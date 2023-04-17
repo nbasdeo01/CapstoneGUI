@@ -14,7 +14,6 @@ class CashRegisterApp(tk.Tk):
         self.geometry("1024x600") 
         self.attributes("-fullscreen", True)
         self.bind("<Escape>", self.exit_fullscreen)
-
  
         self.correct_passcode = "1234" 
         self.admin_page = tk.Frame(self)
@@ -228,6 +227,7 @@ class CashRegisterApp(tk.Tk):
         cursor.execute("SELECT password FROM passwords WHERE name=?", ("default",))
         self.correct_passcode = cursor.fetchone()[0]
         conn.close()
+
     def update_passcode(self):
         new_passcode = self.admin_entry.get()
         if len(new_passcode) > 0:
@@ -253,11 +253,9 @@ class CashRegisterApp(tk.Tk):
             self.total = 0.0
             self.total_var.set(f"${self.total:.2f}")
 
-
     def check_passcode(self):
         admin_password = "1111"  # Set your desired admin password here
         entered_passcode = self.passcode_entry.get()
-
         if entered_passcode == self.correct_passcode:
             self.passcode_page.grid_remove()
             self.cash_register_page.grid()
@@ -406,7 +404,6 @@ class CashRegisterApp(tk.Tk):
 
     def delete_item(self):
         item_name = self.delete_item_name_entry.get()
-
         # Find the item in the list
         for i, item in enumerate(self.items):
             if item[0].strip() == item_name.strip():
@@ -419,14 +416,11 @@ class CashRegisterApp(tk.Tk):
                 # Clear the input field
                 self.delete_item_name_entry.delete(0, tk.END)
                 return
-
         messagebox.showerror("Error", "Item not found.")
-
 
     def change_password(self):
         new_password = self.new_password_entry.get()
         confirm_new_password = self.confirm_new_password_entry.get()
-
         if new_password == confirm_new_password:
             self.correct_passcode = new_password
             messagebox.showinfo("Success", "Password changed successfully.")
