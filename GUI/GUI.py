@@ -106,17 +106,17 @@ class CashRegisterApp(tk.Tk):
         self.logout_button.grid(row=4, column=2, padx=20, pady=20, ipadx=20, ipady=10)
 
         # Read Cart button
-        self.read_cart_button = tk.Button(self.cash_register_page, text="Read Cart", font=("Open Sans", 16), command=self.read_cart_description, bg="#4CAF50", fg="#FFFFFF", relief="groove", borderwidth=2)
-        self.read_cart_button.grid(row=3, column=0, padx=20, pady=20, ipadx=20, ipady=10)
+        self.read_cart_button = tk.Button(self.cash_register_page, text="Read Cart", font=("Open Sans", 26), command=self.read_cart_description, bg="#4CAF50", fg="#FFFFFF", relief="groove", borderwidth=2)
+        self.read_cart_button.grid(row=3, column=0, padx=0, pady=0, ipadx=20, ipady=10)
 
         # Access Add Passcode Page button
-        self.add_user_button = tk.Button(self.cash_register_page, text="Add User", font=("Open Sans", 16), command=self.show_add_passcode_page, bg="#4CAF50", fg="#FFFFFF", relief="groove", borderwidth=2)
-        self.add_user_button.grid(row=3, column=1, padx=20, pady=20, ipadx=20, ipady=10)
+        self.add_user_button = tk.Button(self.cash_register_page, text="Add User", font=("Open Sans", 26), command=self.show_add_passcode_page, bg="#4CAF50", fg="#FFFFFF", relief="groove", borderwidth=2)
+        self.add_user_button.grid(row=3, column=1, padx=0, pady=0, ipadx=20, ipady=10)
         self.add_user_button.grid_remove()  # Hide the button initially
 
         # Access Transactions Page button
-        self.transactions_button = tk.Button(self.cash_register_page, text="Transactions", font=("Open Sans", 16), command=self.show_transactions, bg="#4CAF50", fg="#FFFFFF", relief="groove", borderwidth=2)
-        self.transactions_button.grid(row=3, column=2, padx=20, pady=10, ipadx=20, ipady=10)
+        self.transactions_button = tk.Button(self.cash_register_page, text="Transactions", font=("Open Sans", 26), command=self.show_transactions, bg="#4CAF50", fg="#FFFFFF", relief="groove", borderwidth=2)
+        self.transactions_button.grid(row=3, column=2, padx=0, pady=0, ipadx=20, ipady=10)
 
         # Place this code within your create_cash_register_page() function
         add_item_label = tk.Label(self.cash_register_page, text="Add New Item", font=("Open Sans", 16))
