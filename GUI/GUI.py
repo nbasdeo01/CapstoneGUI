@@ -1,11 +1,13 @@
 import tkinter as tk
-from tkinter import messagebox
 import sqlite3
-from PIL import Image, ImageTk
 import subprocess
+import os
+import datetime
+import pytz
+from tkinter import messagebox
+from PIL import Image, ImageTk
 from gtts import gTTS
 from playsound import playsound
-import os
 
 class CashRegisterApp(tk.Tk):
     def __init__(self):
@@ -217,7 +219,26 @@ class CashRegisterApp(tk.Tk):
         cursor = conn.cursor()
         cursor.execute("CREATE TABLE IF NOT EXISTS passwords (name TEXT PRIMARY KEY, password TEXT)")
         cursor.execute("INSERT OR IGNORE INTO passwords (name, password) VALUES (?, ?)", ("passcode1", self.correct_passcode))
-        cursor.execute("CREATE TABLE IF NOT EXISTS transactions (id INTEGER PRIMARY KEY AUTOINCREMENT, transaction_data TEXT, total REAL, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)")
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS transactions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                transaction_data TEXT,
+                total REAL,
+                timestamp DATETIME DEFAULT (datetime('now', 'localtime'))
+            )
+        """)
+        conn.commit()
+        conn.close()
+
+    def est_now(self):
+        utc_now = datetime.datetime.now(datetime.timezone.utc)
+        est = pytz.timezone('US/Eastern')
+        return utc_now.astimezone(est).strftime('%Y-%m-%d %H:%M:%S')
+
+    def insert_transaction(self, transaction_data, total):
+        conn = sqlite3.connect("cash_register.db")
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO transactions (transaction_data, total, timestamp) VALUES (?, ?, ?)", (transaction_data, total, self.est_now()))
         conn.commit()
         conn.close()
 
@@ -314,7 +335,7 @@ class CashRegisterApp(tk.Tk):
             self.new_passcode_entry.delete(0, tk.END)
             self.back_to_cash_register_page()
         else:
-            messagebox.showerror("Error", "Please enter a valid passcode.")
+            messagebox.showerror("Error", "Please enter a valid user ID.")
             self.new_passcode_entry.delete(0, tk.END)
 
     def submit_passcode(self):
@@ -409,20 +430,16 @@ class CashRegisterApp(tk.Tk):
     def add_item(self):
         item_name = self.new_item_name_entry.get()
         item_price = float(self.new_item_price_entry.get())
-
         # Check if the item already exists
         for existing_item in self.items:
             if existing_item[0] == item_name:
                 messagebox.showerror("Error", "Item already exists.")
                 return
-
         # Add item to the items list
         self.items.append((item_name, item_price))
-
         # Update item buttons
         self.update_item_buttons()
         self.update_item_listbox()
-
         # Clear the input fields
         self.new_item_name_entry.delete(0, tk.END)
         self.new_item_price_entry.delete(0, tk.END)
@@ -431,22 +448,18 @@ class CashRegisterApp(tk.Tk):
         old_item_name = self.edit_item_name_entry.get()
         new_item_name = self.new_edit_item_name_entry.get()
         new_item_price = float(self.new_edit_item_price_entry.get())
-
         # Find the item in the list
         for i, item in enumerate(self.items):
             if item[0] == old_item_name:
                 # Update the item
                 self.items[i] = (new_item_name, new_item_price)
-
                 # Update item buttons
                 self.update_item_buttons()
-
                 # Clear the input fields
                 self.edit_item_name_entry.delete(0, tk.END)
                 self.new_edit_item_name_entry.delete(0, tk.END)
                 self.new_edit_item_price_entry.delete(0, tk.END)
                 return
-
         messagebox.showerror("Error", "Item not found.")
 
     def delete_item(self):
@@ -456,10 +469,8 @@ class CashRegisterApp(tk.Tk):
             if item[0].strip() == item_name.strip():
                 # Remove the item from the list
                 self.items.pop(i)
-
                 # Update item buttons
                 self.update_item_buttons()
-
                 # Clear the input field
                 self.delete_item_name_entry.delete(0, tk.END)
                 return
