@@ -19,6 +19,7 @@ class CashRegisterApp(tk.Tk):
         self.correct_passcode = "1234" 
         self.admin_page = tk.Frame(self)
         self.passcode_page = tk.Frame(self)
+        self.create_database()
         self.create_add_passcode_page()
         self.create_passcode_page()
         self.create_cash_register_page()
@@ -260,7 +261,14 @@ class CashRegisterApp(tk.Tk):
         conn = sqlite3.connect("cash_register.db")
         cursor = conn.cursor()
         cursor.execute("SELECT password FROM passwords WHERE name=?", ("passcode1",))
-        self.correct_passcode = cursor.fetchone()[0]
+        result = cursor.fetchone()
+        
+        if result:
+            self.correct_passcode = result[0]
+        else:
+            self.correct_passcode = None
+            # Handle the case where no matching record is found, e.g., log an error message, raise an exception, or set a default value.
+        
         conn.close()
 
     def update_passcode(self):
