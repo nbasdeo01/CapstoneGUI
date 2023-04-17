@@ -394,6 +394,7 @@ class CashRegisterApp(tk.Tk):
             main_py_path = "//home//jetson//Desktop//CapstoneGUI//Cash_Detection//main.py"
             subprocess.run(["python", main_py_path, str(self.total)], check=True)
             # Insert the transaction data into the database
+            print(f"Items: {self.items}")
             transaction_data = ", ".join([f"{item[0]} x {item[1]}" for item in self.items])
             print(f"Transaction data: {transaction_data}")
             print(f"Total: {self.total}")
