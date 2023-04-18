@@ -101,5 +101,5 @@ def detect_click():
     cap.release()
     cv2.destroyAllWindows()
     return total_amount
-
+detect_cash(10)
 
