@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import tkinter as tk
 from PIL import Image, ImageTk
-from threading import Thread
+from threading import Thread, Lock
 
 def detect_cash(target_amount):
     cap = None
@@ -11,6 +11,8 @@ def detect_cash(target_amount):
     window = None
     running = True
     total_amount = 0
+    process_frame = False
+    frame_lock = Lock()
     def on_detect_click():
         global process_frame
         process_frame = True
@@ -26,14 +28,15 @@ def detect_cash(target_amount):
     def update_image_label():
         global frame_label, photo
         while not target_reached and running:
-            if cap is not None:
-                _, cv_frame = cap.read()
-                image = Image.fromarray(cv2.cvtColor(cv_frame, cv2.COLOR_BGR2RGB))
-                image = image.resize((640, 360), Image.ANTIALIAS)
-                photo = ImageTk.PhotoImage(image)
-                frame_label.config(image=photo)
-                frame_label.image = photo
-            window.update_idletasks()
+            with frame_lock:
+                if cap is not None:
+                    _, cv_frame = cap.read()
+                    image = Image.fromarray(cv2.cvtColor(cv_frame, cv2.COLOR_BGR2RGB))
+                    image = image.resize((640, 360), Image.ANTIALIAS)
+                    photo = ImageTk.PhotoImage(image)
+                    frame_label.config(image=photo)
+                    frame_label.image = photo
+                window.update_idletasks()
 
     def run_detection():  
         global process_frame, target_reached, cap, photo
@@ -131,6 +134,7 @@ def detect_cash(target_amount):
                         cv2.putText(frame, "Target amount reached!", (10, 110), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
                         break
         # Display the total amount and change required on the frame
+            frame_lock.acquire()
             cv2.putText(frame, "Total amount: ${:.2f}".format(total_amount), (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
             cv2.putText(frame, "Amount needed: ${:.2f}".format(target_amount - total_amount), (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
             cv2.putText(frame, "Press 'Detect' to detect, 'Quit' to add coins", (10, 150), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
@@ -138,6 +142,7 @@ def detect_cash(target_amount):
             photo = ImageTk.PhotoImage(image)
             frame_label.config(image=photo)
             frame_label.photo = photo
+            frame_lock.release()
 
         window.update_idletasks()
     # Release the camera and close all windows
