@@ -46,8 +46,11 @@ def detect_cash(target_amount):
         running = True
         while running:
             ret, frame = cap.read()
-            with frame_lock:
-                shared_frame = frame.copy()
+            if ret:
+                with frame_lock:
+                    shared_frame = frame.copy()
+            else:
+                break
         cap.release()
 
     def run_detection():  
@@ -79,12 +82,12 @@ def detect_cash(target_amount):
         cap = cv2.VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM),format=NV12,width=640,height=480,framerate=30/1 ! nvvidconv ! video/x-raw,format=BGRx ! videoconvert ! video/x-raw,format=BGR ! appsink drop=1", cv2.CAP_GSTREAMER)
         process_frame = False
         target_reached = False
-        
+        frame = None
         while not target_reached and running:
             with frame_lock:
                 if shared_frame is not None:
                     frame = shared_frame.copy()
-            if process_frame:
+            if process_frame and frame is not None:
                 process_frame = False
                 ret, frame = cap.read()
                 if ret:
