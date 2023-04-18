@@ -452,7 +452,7 @@ class CashRegisterApp(tk.Tk):
             self.add_item_button.grid()
             self.add_item_label.grid()
             self.item_name_entry.grid()
-            self.item_price_entry.grid_remove()
+            self.item_price_entry.grid()
             self.item_image_entry.grid_remove()
             self.new_item_quantity_entry.grid()
             self.new_item_quantity_label.grid()
