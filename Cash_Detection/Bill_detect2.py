@@ -13,6 +13,7 @@ def detect_cash(target_amount):
     total_amount = 0
     process_frame = False
     frame_lock = Lock()
+    shared_frame = None
     def on_detect_click():
         global process_frame
         process_frame = True
@@ -26,17 +27,26 @@ def detect_cash(target_amount):
         window.destroy()
 
     def update_image_label():
-        global frame_label, photo
+        global frame_label, photo, shared_frame
         while not target_reached and running:
             with frame_lock:
-                if cap is not None:
+                if shared_frame is not None:
                     _, cv_frame = cap.read()
                     image = Image.fromarray(cv2.cvtColor(cv_frame, cv2.COLOR_BGR2RGB))
                     image = image.resize((640, 360), Image.ANTIALIAS)
                     photo = ImageTk.PhotoImage(image)
                     frame_label.config(image=photo)
                     frame_label.image = photo
-                window.update_idletasks()
+            window.update_idletasks()
+    def capture_frames():
+        global cap, running, shared_frame
+        cap = cv2.VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM),format=NV12,width=640,height=480,framerate=30/1 ! nvvidconv ! video/x-raw,format=BGRx ! videoconvert ! video/x-raw,format=BGR ! appsink drop=1", cv2.CAP_GSTREAMER)
+
+        while running:
+            ret, frame = cap.read()
+            with frame_lock:
+                shared_frame = frame.copy()
+        cap.release()
 
     def run_detection():  
         global process_frame, target_reached, cap, photo
@@ -63,13 +73,14 @@ def detect_cash(target_amount):
         total_amount = 0
         detected_objects = []
         frames_to_live = 30
-        cap = cv2.VideoCapture(0)
-        #cap = cv2.VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM),format=NV12,width=640,height=480,framerate=30/1 ! nvvidconv ! video/x-raw,format=BGRx ! videoconvert ! video/x-raw,format=BGR ! appsink drop=1", cv2.CAP_GSTREAMER)
+        #cap = cv2.VideoCapture(0)
+        cap = cv2.VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM),format=NV12,width=640,height=480,framerate=30/1 ! nvvidconv ! video/x-raw,format=BGRx ! videoconvert ! video/x-raw,format=BGR ! appsink drop=1", cv2.CAP_GSTREAMER)
         process_frame = False
         target_reached = False
         
         while not target_reached and running:
-            ret, frame = cap.read()
+            with frame_lock:
+                frame = shared_frame.copy()
             if process_frame:
                     process_frame = False
                     ret, frame = cap.read()
@@ -165,6 +176,9 @@ def detect_cash(target_amount):
 
     quit_button = tk.Button(control_frame, text="Quit", command=on_quit_click, width=20, height=2, bg="red", fg="white", font=("Helvetica", 12))
     quit_button.pack(side="left", padx=(10, 10))
+    
+    capture_frames_thread = Thread(target=capture_frames)
+    capture_frames_thread.start()
 
     detection_thread = Thread(target=run_detection)
     detection_thread.start()
@@ -174,3 +188,4 @@ def detect_cash(target_amount):
 
     window.mainloop()
     return total_amount
+detect_cash(10)
