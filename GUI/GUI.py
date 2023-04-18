@@ -130,7 +130,7 @@ class CashRegisterApp(tk.Tk):
         self.item_price_entry = ttk.Entry(self.cash_register_page)
         self.item_price_entry.grid(row=6, column=1, pady=10)
         self.item_price_label = tk.Label(self.cash_register_page, text="Price", font=("Open Sans", 16))
-        self.new_item_quantity_label.grid(row=6, column=0)
+        self.item_price_label.grid(row=6, column=0)
 
         # Item image path entry
         self.item_image_entry = ttk.Entry(self.cash_register_page)
@@ -455,6 +455,7 @@ class CashRegisterApp(tk.Tk):
             self.add_item_label.grid()
             self.item_name_entry.grid()
             self.item_price_entry.grid()
+            self.item_price_label.grid()
             self.item_image_entry.grid_remove()
             self.new_item_quantity_entry.grid()
             self.new_item_quantity_label.grid()
@@ -466,6 +467,7 @@ class CashRegisterApp(tk.Tk):
             self.item_image_entry.grid_remove()
             self.new_item_quantity_entry.grid_remove()
             self.new_item_quantity_label.grid_remove()
+            self.item_price_label.grid_remove()
 
     def check_passcode(self):
         admin_password = "1234"
