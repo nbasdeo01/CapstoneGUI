@@ -115,7 +115,7 @@ class CashRegisterApp(tk.Tk):
         self.add_user_button.grid(row=3, column=1, padx=20, pady=20, ipadx=20, ipady=10)
 
         # Access Transactions Page button
-        self.transactions_button = tk.Button(self.cash_register_page, text="Transactions", font=("Open Sans", 16), command=self.show_transactions, bg="#4CAF50", fg="#FFFFFF", relief="groove", borderwidth=2)
+        self.transactions_button = tk.Button(self.cash_register_page, text="Transactions", font=("Open Sans", 16), command=self.process_payment, bg="#4CAF50", fg="#FFFFFF", relief="groove", borderwidth=2)
         self.transactions_button.grid(row=3, column=2, padx=20, pady=10, ipadx=20, ipady=10)
 
         # Place this code within your create_cash_register_page() function
@@ -346,7 +346,6 @@ class CashRegisterApp(tk.Tk):
             button.bind("<Enter>", on_enter)
             button.bind("<Leave>", on_leave)
 
-
         # Submit button
         self.submit_button = tk.Button(self.passcode_page, text="Enter", font=("Open Sans", 20), command=self.submit_passcode, bg="#4CAF50", fg="#FFFFFF", relief="groove", borderwidth=2)
         self.submit_button.grid(row=5, column=2, padx=0, pady=0, ipadx=110, ipady=30)
@@ -354,7 +353,6 @@ class CashRegisterApp(tk.Tk):
         # Clear button
         self.clear_button = tk.Button(self.passcode_page, text="Clear", font=("Open Sans", 20), command=self.clear_passcode_entry, bg="#FF5722", fg="#FFFFFF", relief="groove", borderwidth=2)
         self.clear_button.grid(row=5, column=0, padx=0, pady=0, ipadx=110, ipady=30)
-
 
     def update_passcode_entry(self, text):
         current_text = self.passcode_entry.get()
@@ -380,7 +378,7 @@ class CashRegisterApp(tk.Tk):
     def est_now(self):
         utc_now = datetime.datetime.now(datetime.timezone.utc)
         est = pytz.timezone('US/Eastern')
-        return utc_now.astimezone(est).strftime('%Y-%m-%d %H:%M:%S')
+        return utc_now.astimezone(est).strftime('%Y-%m-%d "|" %H:%M:%S')
 
     def insert_transaction(self, transaction_data, total):
         conn = sqlite3.connect("cash_register.db")
@@ -389,26 +387,20 @@ class CashRegisterApp(tk.Tk):
         conn.commit()
         conn.close()
 
-    def save_transaction(self, transaction_data, total):
-        conn = sqlite3.connect("cash_register.db")
-        cursor = conn.cursor()
-        cursor.execute("INSERT INTO transactions (transaction_data, total) VALUES (?, ?)", (transaction_data, total))
-        conn.commit()
-        conn.close()
-
     def process_payment(self):
         try:
             main_py_path = "//home//jetson//Desktop//CapstoneGUI//Cash_Detection//main.py"
             subprocess.run(["python", main_py_path, str(self.total)], check=True)
-
             # Insert the transaction data into the database
+            print(f"Items: {self.items}")
             transaction_data = ", ".join([f"{item[0]} x {item[1]}" for item in self.items])
+            print(f"Transaction data: {transaction_data}")
+            print(f"Total: {self.total}")
+            print(f"Timestamp: {self.est_now()}")
             self.insert_transaction(transaction_data, self.total)
-
             self.clear_items()
         except subprocess.CalledProcessError as e:
             messagebox.showerror("Error", f"An error occurred while running main.py: {e}")
-
 
     def load_password(self):
         conn = sqlite3.connect("cash_register.db")
