@@ -115,11 +115,11 @@ class CashRegisterApp(tk.Tk):
         self.add_user_button.grid(row=3, column=1, padx=20, pady=20, ipadx=20, ipady=10)
 
         # Access Transactions Page button
-        self.transactions_button = tk.Button(self.cash_register_page, text="Transactions", font=("Open Sans", 16), command=self.process_payment, bg="#4CAF50", fg="#FFFFFF", relief="groove", borderwidth=2)
+        self.transactions_button = tk.Button(self.cash_register_page, text="Transactions", font=("Open Sans", 16), command=self.show_transactions, bg="#4CAF50", fg="#FFFFFF", relief="groove", borderwidth=2)
         self.transactions_button.grid(row=3, column=2, padx=20, pady=10, ipadx=20, ipady=10)
 
         # Place this code within your create_cash_register_page() function
-        self.add_item_label = tk.Label(self.cash_register_page, text="Add New Item", font=("Open Sans", 16))
+        self.add_item_label = tk.Label(self.cash_register_page, text="Enter Item Name: ", font=("Open Sans", 16))
         self.add_item_label.grid(row=5, column=0, pady=10)
 
         # Item name entry
