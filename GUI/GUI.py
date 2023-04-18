@@ -239,13 +239,20 @@ class CashRegisterApp(tk.Tk):
             button.grid(row=i // 3, column=i % 3, padx=10, pady=10)
             self.item_buttons.append(button)
 
+    def insert_transaction(self, transaction_data, total):
+        conn = sqlite3.connect("cash_register.db")
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO transactions (transaction_data, total, timestamp) VALUES (?, ?, ?)", (transaction_data, total, self.est_now()))
+        conn.commit()
+        conn.close()
+
     def show_transactions(self):
         self.cash_register_page.grid_remove()
         self.transactions_page.grid()
         self.transactions_text.delete(1.0, tk.END)
         transactions = self.get_transactions()
         for transaction in transactions:
-            self.transactions_text.insert(tk.END, f"ID: {transaction[0]}\nTransaction Data: {transaction[1]}\nTotal: {transaction[2]}\nTimestamp: {transaction[3]}\n\n")
+            self.transactions_text.insert(tk.END, f"ID: {transaction[0]}\nTransaction Data: {transactions[1]}\nTotal: {transaction[2]}\nTimestamp: {transaction[3]}\n\n")
 
     def get_transactions(self):
         conn = sqlite3.connect("cash_register.db")
@@ -385,7 +392,7 @@ class CashRegisterApp(tk.Tk):
     def est_now(self):
         utc_now = datetime.datetime.now(datetime.timezone.utc)
         est = pytz.timezone('US/Eastern')
-        return utc_now.astimezone(est).strftime('%Y-%m-%d "|" %H:%M:%S')
+        return utc_now.astimezone(est).strftime('%Y-%m-%d | %H:%M:%S')
 
     def insert_transaction(self, transaction_data, total):
         conn = sqlite3.connect("cash_register.db")
