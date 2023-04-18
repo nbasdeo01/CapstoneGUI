@@ -134,10 +134,10 @@ class CashRegisterApp(tk.Tk):
         self.item_image_entry = ttk.Entry(self.cash_register_page)
         self.item_image_entry.grid(row=7, column=1, pady=10)
 
-        self.new_item_quantity_entry = tk.Entry(self.item_entry_frame, width=10)
-        self.new_item_quantity_entry.grid(row=0, column=2)
-        self.new_item_quantity_label = tk.Label(self.item_entry_frame, text="Quantity")
-        self.new_item_quantity_label.grid(row=1, column=2)
+        self.new_item_quantity_entry = tk.Entry(self.cash_register_page)
+        self.new_item_quantity_entry.grid(row=8, column=1, pady=10)
+        self.new_item_quantity_label = tk.Label(self.cash_register_page, text="Quantity", font=("Open Sans", 16))
+        self.new_item_quantity_label.grid(row=8, column=0)
 
         # Add item button
         self.add_item_button = tk.Button(self.cash_register_page, text="Add Item", font=("Open Sans", 16), command=lambda: self.add_item_to_db(self.item_name_entry.get(), self.item_price_entry.get(), self.item_image_entry.get()))
