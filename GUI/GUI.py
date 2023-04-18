@@ -119,8 +119,8 @@ class CashRegisterApp(tk.Tk):
         self.transactions_button.grid(row=3, column=2, padx=20, pady=10, ipadx=20, ipady=10)
 
         # Place this code within your create_cash_register_page() function
-        add_item_label = tk.Label(self.cash_register_page, text="Add New Item", font=("Open Sans", 16))
-        add_item_label.grid(row=5, column=0, pady=10)
+        self.add_item_label = tk.Label(self.cash_register_page, text="Add New Item", font=("Open Sans", 16))
+        self.add_item_label.grid(row=5, column=0, pady=10)
 
         # Item name entry
         self.item_name_entry = ttk.Entry(self.cash_register_page)
@@ -445,8 +445,16 @@ class CashRegisterApp(tk.Tk):
     def toggle_add_item_button(self, show=True):
         if show:
             self.add_item_button.grid()
+            self.add_item_label.grid()
+            self.item_name_entry.grid()
+            self.item_price_entry.grid()
+            self.item_image_entry.grid()
         else:
             self.add_item_button.grid_remove()
+            self.add_item_label.grid_remove()
+            self.item_name_entry.grid_remove()
+            self.item_price_entry.grid_remove()
+            self.item_image_entry.grid_remove()
 
     def check_passcode(self):
         admin_password = "1234"
@@ -459,7 +467,7 @@ class CashRegisterApp(tk.Tk):
         if result is not None:
             self.passcode_page.grid_remove()
             self.cash_register_page.grid()
-            if entered_passcode == admin_password or entered_passcode == "1234":
+            if entered_passcode == admin_password:
                 self.admin = True
             else:
                 self.admin = False
