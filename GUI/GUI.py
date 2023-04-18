@@ -129,6 +129,8 @@ class CashRegisterApp(tk.Tk):
         # Item price entry
         self.item_price_entry = ttk.Entry(self.cash_register_page)
         self.item_price_entry.grid(row=6, column=1, pady=10)
+        self.item_price_label = tk.Label(self.cash_register_page, text="Price", font=("Open Sans", 16))
+        self.new_item_quantity_label.grid(row=6, column=0)
 
         # Item image path entry
         self.item_image_entry = ttk.Entry(self.cash_register_page)
