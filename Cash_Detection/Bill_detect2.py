@@ -38,7 +38,7 @@ def detect_cash(target_amount):
                     frame_label.config(image=photo)
                     frame_label.image = photo
             window.update_idletasks()
-            
+
     def capture_frames():
         global cap, running, shared_frame
         cap = cv2.VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM),format=NV12,width=640,height=480,framerate=30/1 ! nvvidconv ! video/x-raw,format=BGRx ! videoconvert ! video/x-raw,format=BGR ! appsink drop=1", cv2.CAP_GSTREAMER)
@@ -81,7 +81,8 @@ def detect_cash(target_amount):
         
         while not target_reached and running:
             with frame_lock:
-                frame = shared_frame.copy()
+                if shared_frame is not None:
+                    frame = shared_frame.copy()
             if process_frame:
                 process_frame = False
                 ret, frame = cap.read()
