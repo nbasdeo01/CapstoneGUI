@@ -14,14 +14,15 @@ import os
 import uuid
 
 class CashRegisterApp(tk.Tk):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.title("Cash Register")
         self.geometry("1024x600") 
         self.attributes("-fullscreen", True)
         self.bind("<Escape>", self.exit_fullscreen)
+        self.admin = False
         self.correct_passcode = "1234" 
-        self.user_password = ""
+        self.user_password = tk.StringVar()
         self.admin_page = tk.Frame(self)
         self.passcode_page = tk.Frame(self)
         self.create_database()
@@ -29,7 +30,6 @@ class CashRegisterApp(tk.Tk):
         self.create_passcode_page()
         self.create_transactions_page()
         self.create_cash_register_page()
-        self.create_admin_page()
         self.load_password()
         self.create_cart()
         self.create_remove_button()
@@ -109,10 +109,10 @@ class CashRegisterApp(tk.Tk):
         self.read_cart_button = tk.Button(self.cash_register_page, text="Read Cart", font=("Open Sans", 16), command=self.read_cart_description, bg="#4CAF50", fg="#FFFFFF", relief="groove", borderwidth=2)
         self.read_cart_button.grid(row=3, column=0, padx=20, pady=20, ipadx=20, ipady=10)
 
+    
         # Access Add Passcode Page button
         self.add_user_button = tk.Button(self.cash_register_page, text="Add User", font=("Open Sans", 16), command=self.show_add_passcode_page, bg="#4CAF50", fg="#FFFFFF", relief="groove", borderwidth=2)
         self.add_user_button.grid(row=3, column=1, padx=20, pady=20, ipadx=20, ipady=10)
-        self.add_user_button.grid_remove()  # Hide the button initially
 
         # Access Transactions Page button
         self.transactions_button = tk.Button(self.cash_register_page, text="Transactions", font=("Open Sans", 16), command=self.show_transactions, bg="#4CAF50", fg="#FFFFFF", relief="groove", borderwidth=2)
@@ -123,23 +123,21 @@ class CashRegisterApp(tk.Tk):
         add_item_label.grid(row=5, column=0, pady=10)
 
         # Item name entry
-        item_name_entry = ttk.Entry(self.cash_register_page)
-        item_name_entry.grid(row=5, column=1, pady=10)
+        self.item_name_entry = ttk.Entry(self.cash_register_page)
+        self.item_name_entry.grid(row=5, column=1, pady=10)
 
         # Item price entry
-        item_price_entry = ttk.Entry(self.cash_register_page)
-        item_price_entry.grid(row=6, column=1, pady=10)
+        self.item_price_entry = ttk.Entry(self.cash_register_page)
+        self.item_price_entry.grid(row=6, column=1, pady=10)
 
         # Item image path entry
-        item_image_entry = ttk.Entry(self.cash_register_page)
-        item_image_entry.grid(row=7, column=1, pady=10)
+        self.item_image_entry = ttk.Entry(self.cash_register_page)
+        self.item_image_entry.grid(row=7, column=1, pady=10)
 
         # Add item button
-        self.add_item_button = tk.Button(self.cash_register_page, text="Add Item", font=("Open Sans", 16), command=lambda: self.add_item_to_db(item_name_entry.get(), item_price_entry.get(), item_image_entry.get()))
-        if self.correct_passcode == "1234":
-            self.add_item_button.grid(row=5, column=2, padx=20, pady=20, ipadx=20, ipady=10)
-        else:
-            self.add_item_button.grid_remove()
+        self.add_item_button = tk.Button(self.cash_register_page, text="Add Item", font=("Open Sans", 16), command=lambda: self.add_item_to_db(self.item_name_entry.get(), self.item_price_entry.get(), self.item_image_entry.get()))
+        self.add_item_button.grid(row=5, column=2, padx=20, pady=20, ipadx=20, ipady=10)
+
         # Initialize total
         self.total = 0.0
         self.update_items()
@@ -425,15 +423,7 @@ class CashRegisterApp(tk.Tk):
             self.correct_passcode = None
             self.user_password = ""
             # Handle the case where no matching record is found, e.g., log an error message, raise an exception, or set a default value.
-        
         conn.close()
-
-    def update_add_item_button_visibility(self):
-        if self.user_password == "1234":
-            self.add_item_button.config(command=lambda: self.add_item_to_db(item_name_entry.get(), item_price_entry.get(), item_image_entry.get()))  # Update the command for the Add Item button
-            self.add_item_button.grid(row=5, column=2, padx=20, pady=20, ipadx=20, ipady=10)
-        else:
-            self.add_item_button.grid_remove()
 
     def update_passcode(self):
         new_passcode = self.admin_entry.get()
@@ -460,8 +450,14 @@ class CashRegisterApp(tk.Tk):
             self.total = 0.0
             self.total_var.set(f"${self.total:.2f}")
 
+    def toggle_add_item_button(self, show=True):
+        if show:
+            self.add_item_button.grid()
+        else:
+            self.add_item_button.grid_remove()
+
     def check_passcode(self):
-        admin_password = "0000"  # Set your desired admin password here
+        admin_password = "1234"
         entered_passcode = self.passcode_entry.get()
         conn = sqlite3.connect("cash_register.db")
         cursor = conn.cursor()
@@ -469,25 +465,34 @@ class CashRegisterApp(tk.Tk):
         result = cursor.fetchone()
         conn.close()
         if result is not None:
-            if entered_passcode == admin_password:
-                self.passcode_page.grid_remove()
-                self.admin_page.grid()
-                return True
+            self.passcode_page.grid_remove()
+            self.cash_register_page.grid()
+            if entered_passcode == admin_password or entered_passcode == "1234":
+                self.admin = True
             else:
-                self.passcode_page.grid_remove()
-                self.cash_register_page.grid()
-                if entered_passcode == "1234":
-                    self.add_user_button.grid()  # Show the "Add User" button for the "1234" user
-                    self.transactions_button.grid()  # Show the "Transactions" button for the "1234" user
-                else:
-                    self.add_user_button.grid_remove()  # Hide the "Add User" button for other users
-                    self.transactions_button.grid_remove()  # Hide the "Transactions" button for other users
-                return True
+                self.admin = False
+
+            if self.admin:
+                self.add_user_button.grid()  # Show the "Add User" button for the admin user
+                self.transactions_button.grid()  # Show the "Transactions" button for the admin user
+                self.toggle_add_item_button()  # Show the "Add Item" button for the admin user
+            else:
+                self.add_user_button.grid_remove()  # Hide the "Add User" button for other users
+                self.transactions_button.grid_remove()  # Hide the "Transactions" button for other users
+                self.toggle_add_item_button(False)  # Hide the "Add Item" button for other users
+
+            return True
         else:
             messagebox.showerror("Error", "Incorrect passcode, please try again.")
             self.passcode_entry.delete(0, tk.END)
-            return False
-        
+
+    def update_add_item_button_visibility(self):
+        if self.user_password == "1234":
+            self.add_item_button.config(command=lambda: self.add_item_to_db(self.item_name_entry.get(), self.item_price_entry.get(), self.item_image_entry.get()))  # Update the command for the Add Item button
+            self.add_item_button.grid(row=8, column=1, padx=20, pady=20, ipadx=20, ipady=10)
+        else:
+            self.add_item_button.grid_remove()
+
     def show_add_passcode_page(self):
         self.cash_register_page.grid_remove()
         self.add_passcode_page.grid()
@@ -516,74 +521,6 @@ class CashRegisterApp(tk.Tk):
             print("Access granted.")
         else:
             print("Incorrect passcode.")
-
-    def create_admin_page(self):
-        self.admin_page = tk.Frame(self)
-        self.admin_page.grid(row=0, column=0, sticky="nsew")
-
-        # Item management label
-        self.item_mgmt_label = tk.Label(self.admin_page, text="Item Management", font=("Open Sans", 16))
-        self.item_mgmt_label.grid(row=0, column=0, padx=10, pady=10)
-
-        # Item listbox
-        self.item_listbox = tk.Listbox(self.admin_page, font=("Open Sans", 16), height=10, width=30)
-        self.item_listbox.grid(row=1, column=0, padx=10, pady=10)
-        self.populate_item_listbox()
-
-        # Edit item button
-        self.edit_item_button = tk.Button(self.admin_page, text="Edit Item", font=("Open Sans", 16), command=self.edit_item)
-        self.edit_item_button.grid(row=2, column=0, padx=10, pady=10)
-
-        # Delete item entry
-        self.delete_item_name_entry = tk.Entry(self.admin_page, font=("Open Sans", 16), width=30)
-        self.delete_item_name_entry.grid(row=4, column=1, padx=10, pady=10)
-
-        # Delete item button
-        self.delete_item_button = tk.Button(self.admin_page, text="Delete Item", font=("Open Sans", 16), command=self.delete_item)
-        self.delete_item_button.grid(row=3, column=0, padx=10, pady=10)
-
-        # Add item label
-        self.add_item_label = tk.Label(self.admin_page, text="Add Item", font=("Open Sans", 16))
-        self.add_item_label.grid(row=0, column=1, padx=10, pady=10)
-
-        # Add item inputs
-        self.new_item_name_label = tk.Label(self.admin_page, text="Item name:", padx=10, pady=10, font=("Open Sans", 16), bg="#FFFFFF", fg="#000000")
-        self.new_item_name_label.grid(row=1, column=1, padx=10, pady=10)
-        self.new_item_name_entry = tk.Entry(self.admin_page, font=("Open Sans", 16))
-        self.new_item_name_entry.grid(row=1, column=2, padx=10, pady=10)
-
-        self.new_item_price_label = tk.Label(self.admin_page, text="Item price:", padx=10, pady=10, font=("Open Sans", 16), bg="#FFFFFF", fg="#000000")
-        self.new_item_price_label.grid(row=2, column=1, padx=10, pady=10)
-        self.new_item_price_entry = tk.Entry(self.admin_page, font=("Open Sans", 16))
-        self.new_item_price_entry.grid(row=2, column=2, padx=10, pady=10)
-
-        # Add item button
-        self.add_item_button = tk.Button(self.admin_page, text="Add Item", font=("Open Sans", 16), command=lambda: self.add_item(self))
-        self.add_item_button.grid(row=3, column=1, padx=10, pady=10, columnspan=2)
-
-        # Passcode Management
-        self.admin_label = tk.Label(self.admin_page, text="Enter new passcode:")
-        self.admin_label.grid(row=4, column=0, padx=10, pady=10, sticky='e')
-        self.admin_entry = tk.Entry(self.admin_page, font=("Open Sans", 16), show="*", width=10)
-        self.admin_entry.grid(row=4, column=1, padx=10, pady=10, sticky='w')
-
-        # Update passcode button
-        self.update_passcode_button = tk.Button(self.admin_page, text="Update Passcode", font=("Open Sans", 16), command=self.change_password)
-        self.update_passcode_button.grid(row=5, column=0, padx=10, pady=10, columnspan=2)
-
-        # Non-admin password management
-        self.non_admin_password_label = tk.Label(self.admin_page, text="Enter new non-admin password:", font=("Open Sans", 16), bg="#FFFFFF", fg="#000000")
-        self.non_admin_password_label.grid(row=6, column=0, padx=10, pady=10, sticky='e')
-        self.non_admin_password_entry = tk.Entry(self.admin_page, font=("Open Sans", 16), show="*", width=10)
-        self.non_admin_password_entry.grid(row=6, column=1, padx=10, pady=10, sticky='w')
-
-        # Add non-admin password button
-        self.add_non_admin_password_button = tk.Button(self.admin_page, text="Add Non-admin Password", font=("Open Sans", 16), command=self.add_non_admin_password)
-        self.add_non_admin_password_button.grid(row=7, column=0, padx=10, pady=10, columnspan=2)
-
-        # Logout button
-        self.logout_button_admin = tk.Button(self.admin_page, text="Logout", font=("Open Sans", 16), command=self.logout, bg="#FF5722", fg="#FFFFFF", relief="groove", borderwidth=2)
-        self.logout_button_admin.grid(row=6, column=1, padx=10, pady=10, columnspan=2)
 
     def add_non_admin_password(self):
         new_password = self.non_admin_entry.get()
@@ -693,7 +630,6 @@ class CashRegisterApp(tk.Tk):
             self.confirm_new_password_entry.delete(0, tk.END)
 
     def logout(self):
-        self.admin_page.grid_remove()
         self.cash_register_page.grid_remove()
         self.passcode_page.grid()
         self.passcode_entry.delete(0, tk.END)
