@@ -135,9 +135,9 @@ class CashRegisterApp(tk.Tk):
         self.item_image_entry.grid(row=7, column=1, pady=10)
 
         self.new_item_quantity_entry = tk.Entry(self.cash_register_page)
-        self.new_item_quantity_entry.grid(row=8, column=1, pady=10)
+        self.new_item_quantity_entry.grid(row=7, column=1, pady=10)
         self.new_item_quantity_label = tk.Label(self.cash_register_page, text="Quantity", font=("Open Sans", 16))
-        self.new_item_quantity_label.grid(row=8, column=0)
+        self.new_item_quantity_label.grid(row=7, column=0)
 
         # Add item button
         self.add_item_button = tk.Button(self.cash_register_page, text="Add Item", font=("Open Sans", 16), command=lambda: self.add_item_to_db(self.item_name_entry.get(), self.item_price_entry.get(), self.item_image_entry.get()))
@@ -452,8 +452,8 @@ class CashRegisterApp(tk.Tk):
             self.add_item_button.grid()
             self.add_item_label.grid()
             self.item_name_entry.grid()
-            self.item_price_entry.grid()
-            self.item_image_entry.grid()
+            self.item_price_entry.grid_remove()
+            self.item_image_entry.grid_remove()
             self.new_item_quantity_entry.grid()
             self.new_item_quantity_label.grid()
         else:
