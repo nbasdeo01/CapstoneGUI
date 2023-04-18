@@ -134,6 +134,11 @@ class CashRegisterApp(tk.Tk):
         self.item_image_entry = ttk.Entry(self.cash_register_page)
         self.item_image_entry.grid(row=7, column=1, pady=10)
 
+        self.new_item_quantity_entry = tk.Entry(self.item_entry_frame, width=10)
+        self.new_item_quantity_entry.grid(row=0, column=2)
+        self.new_item_quantity_label = tk.Label(self.item_entry_frame, text="Quantity")
+        self.new_item_quantity_label.grid(row=1, column=2)
+
         # Add item button
         self.add_item_button = tk.Button(self.cash_register_page, text="Add Item", font=("Open Sans", 16), command=lambda: self.add_item_to_db(self.item_name_entry.get(), self.item_price_entry.get(), self.item_image_entry.get()))
         self.add_item_button.grid(row=5, column=2, padx=20, pady=20, ipadx=20, ipady=10)
@@ -449,12 +454,16 @@ class CashRegisterApp(tk.Tk):
             self.item_name_entry.grid()
             self.item_price_entry.grid()
             self.item_image_entry.grid()
+            self.new_item_quantity_entry.grid()
+            self.new_item_quantity_label.grid()
         else:
             self.add_item_button.grid_remove()
             self.add_item_label.grid_remove()
             self.item_name_entry.grid_remove()
             self.item_price_entry.grid_remove()
             self.item_image_entry.grid_remove()
+            self.new_item_quantity_entry.grid_remove()
+            self.new_item_quantity_label.grid_remove()
 
     def check_passcode(self):
         admin_password = "1234"
@@ -538,13 +547,14 @@ class CashRegisterApp(tk.Tk):
     def populate_item_listbox(self):
         conn = sqlite3.connect("cash_register.db")
         cursor = conn.cursor()
-        cursor.execute("SELECT name, price FROM items")
+        cursor.execute("SELECT name, price, quantity FROM items")  # Add the quantity column here
         items = cursor.fetchall()
         conn.close()
 
         for item in items:
-            item_name = item[0]
-            self.item_listbox.insert(tk.END, item_name)
+            item_name, item_price, item_quantity = item  # Add the item_quantity variable here
+            self.item_listbox.insert(tk.END, f"{item_name} - ${item_price:.2f} - Quantity: {item_quantity}")  # Show the quantity
+
 
     def update_item_buttons(self):
         self.populate_item_listbox()
@@ -565,22 +575,28 @@ class CashRegisterApp(tk.Tk):
                 continue
             self.item_listbox.insert(tk.END, f"{item_name} - ${item_price:.2f}")
 
-    def add_item(self, cash_register):
+    def add_item(self):
         item_name = self.new_item_name_entry.get()
         item_price = float(self.new_item_price_entry.get())
+        item_quantity = int(self.new_item_quantity_entry.get())  # Add this line to get the quantity
+
         # Check if the item already exists
         for existing_item in self.items:
             if existing_item[0] == item_name:
                 messagebox.showerror("Error", "Item already exists.")
                 return
+
         # Add item to the items list
-        self.items.append((item_name, item_price))
+        self.items.append((item_name, item_price, item_quantity))  # Add the item_quantity variable here
+
         # Update item buttons
         self.update_item_buttons()
         self.update_item_listbox()
+
         # Clear the input fields
         self.new_item_name_entry.delete(0, tk.END)
         self.new_item_price_entry.delete(0, tk.END)
+        self.new_item_quantity_entry.delete(0, tk.END)  # Clear the quantity input field
 
     def edit_item(self):
         old_item_name = self.edit_item_name_entry.get()
@@ -643,6 +659,7 @@ class CashRegisterApp(tk.Tk):
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL UNIQUE,
             price REAL NOT NULL
+            quantity INTEGER NOT NULL
         )
         """)
 
