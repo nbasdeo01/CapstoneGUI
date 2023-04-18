@@ -5,6 +5,7 @@ from PIL import Image, ImageTk
 from threading import Thread, Lock
 
 def detect_cash(target_amount):
+    # Variables
     cap = None
     target_reached = False
     frame_label = None
@@ -14,35 +15,24 @@ def detect_cash(target_amount):
     process_frame = False
     frame_lock = Lock()
     shared_frame = None
+
+    # Button Functions
     def on_detect_click():
-        global process_frame
+        nonlocal process_frame
         process_frame = True
 
     def on_quit_click():
-        global target_reached, running
+        nonlocal target_reached, running
         target_reached = True
         running = False
         if cap is not None:
             cap.release()
         window.destroy()
 
-    def update_image_label():
-        global frame_label, photo, shared_frame
-        shared_frame = None
-        while not target_reached and running:
-            with frame_lock:
-                if shared_frame is not None:
-                    _, cv_frame = cap.read()
-                    image = Image.fromarray(cv2.cvtColor(cv_frame, cv2.COLOR_BGR2RGB))
-                    image = image.resize((640, 360), Image.ANTIALIAS)
-                    photo = ImageTk.PhotoImage(image)
-                    frame_label.config(image=photo)
-                    frame_label.image = photo
-            window.update_idletasks()
-
+    # Capture Frames
     def capture_frames():
-        global cap, running, shared_frame
-        cap = cv2.VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM),format=NV12,width=640,height=480,framerate=30/1 ! nvvidconv ! video/x-raw,format=BGRx ! videoconvert ! video/x-raw,format=BGR ! appsink drop=1", cv2.CAP_GSTREAMER)
+        nonlocal cap, running, shared_frame
+        cap = cv2.VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM),format=NV12,width=640,height=480,framerate=30/1 ! nvvidconv ! video/x-raw,format=BGRx ! videoconvert ! video/x-raw,format=BGR ! appsink drop=1", cv2.CAP_GSTREAMER)  # Change this to your camera source
         running = True
         while running:
             ret, frame = cap.read()
@@ -53,8 +43,22 @@ def detect_cash(target_amount):
                 break
         cap.release()
 
-    def run_detection():  
-        global process_frame, target_reached, cap, photo
+    # Display Frames
+    def update_image_label():
+        nonlocal frame_label, shared_frame
+        while not target_reached and running:
+            with frame_lock:
+                if shared_frame is not None:
+                    image = Image.fromarray(cv2.cvtColor(shared_frame, cv2.COLOR_BGR2RGB))
+                    image = image.resize((640, 360), Image.ANTIALIAS)
+                    photo = ImageTk.PhotoImage(image)
+                    frame_label.config(image=photo)
+                    frame_label.image = photo
+            window.update_idletasks()
+
+    # Main Function
+    def main_function():
+        global total_amount
         def iou(box1, box2):
             x1, y1, w1, h1 = box1
             x2, y2, w2, h2 = box2
@@ -82,12 +86,12 @@ def detect_cash(target_amount):
         cap = cv2.VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM),format=NV12,width=640,height=480,framerate=30/1 ! nvvidconv ! video/x-raw,format=BGRx ! videoconvert ! video/x-raw,format=BGR ! appsink drop=1", cv2.CAP_GSTREAMER)
         process_frame = False
         target_reached = False
-        frame = None
+        
         while not target_reached and running:
             with frame_lock:
                 if shared_frame is not None:
                     frame = shared_frame.copy()
-            if process_frame and frame is not None:
+            if process_frame:
                 process_frame = False
                 ret, frame = cap.read()
                 if ret:
@@ -160,12 +164,13 @@ def detect_cash(target_amount):
             frame_label.config(image=photo)
             frame_label.photo = photo
             frame_lock.release()
-
+            pass
         window.update_idletasks()
     # Release the camera and close all windows
         cap.release()
         cv2.destroyAllWindows()
-
+        
+    # Create GUI
     window = tk.Tk()
     window.title("Cash Detection")
     window.geometry("800x480")
@@ -182,16 +187,18 @@ def detect_cash(target_amount):
 
     quit_button = tk.Button(control_frame, text="Quit", command=on_quit_click, width=20, height=2, bg="red", fg="white", font=("Helvetica", 12))
     quit_button.pack(side="left", padx=(10, 10))
-    
+
+    # Start Threads
     capture_frames_thread = Thread(target=capture_frames)
     capture_frames_thread.start()
 
-    detection_thread = Thread(target=run_detection)
-    detection_thread.start()
+    main_function_thread = Thread(target=main_function)
+    main_function_thread.start()
 
     update_image_thread = Thread(target=update_image_label)
     update_image_thread.start()
 
     window.mainloop()
     return total_amount
+
 detect_cash(10)
