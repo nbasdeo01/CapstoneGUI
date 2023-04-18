@@ -421,7 +421,7 @@ class CashRegisterApp(tk.Tk):
 
     def update_add_item_button_visibility(self):
         if self.user_password == "1234":
-            self.add_item_button.config(command=lambda: self.add_item_to_db(item_name_entry.get(), item_price_entry.get(), item_image_entry.get()))  # Update the command for the Add Item button
+            self.add_item_button.config(command=lambda: self.add_item_to_db(self.item_name_entry.get(), self.item_price_entry.get(), self.item_image_entry.get()))  # Update the command for the Add Item button
             self.add_item_button.grid(row=5, column=2, padx=20, pady=20, ipadx=20, ipady=10)
         else:
             self.add_item_button.grid_remove()

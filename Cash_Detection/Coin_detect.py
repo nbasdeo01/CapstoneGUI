@@ -42,7 +42,7 @@ def update_total_price(total_amount, target_amount):
                 coin_type = 'dime'
             elif 46 <= r < 49:
                 coin_type = 'nickel'
-            elif 50 <= r < 60:
+            elif 50 <= r < 62:
                 coin_type = 'quarter'
             elif 42 <= r < 48:
                 coin_type = 'penny'

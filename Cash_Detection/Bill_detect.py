@@ -50,7 +50,7 @@ def detect_cash(target_amount):
                         scores = detection[5:]
                         class_id = np.argmax(scores)
                         confidence = scores[class_id]
-                        if confidence > 0.5 and (classes[class_id].startswith("dollar_") or classes[class_id].startswith("coin_")):
+                        if confidence > 0.7 and (classes[class_id].startswith("dollar_") or classes[class_id].startswith("coin_")):
                             # Extract bounding box coordinates and monetary value of cash object
                             box = detection[:4] * np.array([frame.shape[1], frame.shape[0], frame.shape[1], frame.shape[0]])
                             cash_objects.append(box.astype("int"))
