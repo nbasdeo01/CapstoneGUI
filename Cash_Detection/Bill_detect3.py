@@ -3,6 +3,7 @@ import numpy as np
 import tkinter as tk
 from tkinter import ttk
 from threading import Thread
+from PIL import Image, ImageTk
 
 def detect_cash(target_amount):
     def iou(box1, box2):
@@ -130,6 +131,9 @@ def detect_cash_with_buttons(target_amount):
     root = tk.Tk()
     root.title("Cash Detection")
 
+    video_label = ttk.Label(root)
+    video_label.grid(column=0, row=0, columnspan=2)
+
     # Create a button to start detecting cash
     detect_button = ttk.Button(root, text="Detect", command=on_detect_button_click)
     detect_button.grid(column=0, row=0)
@@ -142,6 +146,18 @@ def detect_cash_with_buttons(target_amount):
     detect_flag = False
     quit_flag = False
 
+    cap = cv2.VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM),format=NV12,width=640,height=480,framerate=30/1 ! nvvidconv ! video/x-raw,format=BGRx ! videoconvert ! video/x-raw,format=BGR ! appsink drop=1", cv2.CAP_GSTREAMER)
+
+    def update_video_feed():
+        nonlocal cap
+        ret, frame = cap.read()
+        if ret:
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
+            img = Image.fromarray(frame)
+            imgtk = ImageTk.PhotoImage(image=img)
+            video_label.config(image=imgtk)
+            video_label.image = imgtk
+
     def update_loop():
         nonlocal detect_flag, quit_flag
         while not quit_flag:
@@ -149,6 +165,7 @@ def detect_cash_with_buttons(target_amount):
                 detect_flag = False
                 total_amount = detect_cash(target_amount)
                 # Do something with total_amount, e.g., display it in the GUI
+                update_video_feed()
             root.update_idletasks()
             root.update()
 
