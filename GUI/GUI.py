@@ -84,7 +84,6 @@ class CashRegisterApp(tk.Tk):
             button.image = item_image  # Store a reference to the image to avoid garbage collection
             button.grid(row=i // 3, column=i % 3, padx=10, pady=10)
 
-
         # Total label and display
         # self.total_label = tk.Label(self.cash_register_page, text="Total:", font=("Open Sans", 18), bg="#F5F5F5", fg="#333333")
         # self.total_label.grid(row=3, column=0, padx=20, pady=20)
@@ -205,7 +204,6 @@ class CashRegisterApp(tk.Tk):
     def update_items(self):
         conn = sqlite3.connect("cash_register.db")
         cursor = conn.cursor()
-        
         cursor.execute("SELECT name, price, image_path FROM items")
         self.items = []
         for name, price, image_path in cursor.fetchall():
@@ -214,9 +212,7 @@ class CashRegisterApp(tk.Tk):
             except Exception as e:
                 messagebox.showerror("Error", f"Cannot open image for item {name}: {e}")
                 continue  # Skip this item and move to the next one
-
             self.items.append((name, price, item_image))
-
         conn.close()
 
         # Clear the current buttons
@@ -378,14 +374,8 @@ class CashRegisterApp(tk.Tk):
         cursor = conn.cursor()
         cursor.execute("CREATE TABLE IF NOT EXISTS passwords (name TEXT PRIMARY KEY, password TEXT)")
         cursor.execute("INSERT OR IGNORE INTO passwords (name, password) VALUES (?, ?)", ("passcode1", self.correct_passcode))
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS transactions (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                transaction_data TEXT,
-                total REAL,
-                timestamp DATETIME DEFAULT (datetime('now', 'localtime'))
-            )
-        """)
+        cursor.execute("CREATE TABLE IF NOT EXISTS transactions (id INTEGER PRIMARY KEY AUTOINCREMENT, transaction_data TEXT, total REAL, timestamp DATETIME DEFAULT (datetime('now', 'localtime')))")
+        cursor.execute("CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE, price REAL NOT NULL, image_path TEXT NOT NULL, quantity INTEGER NOT NULL)")
         conn.commit()
         conn.close()
 
@@ -660,22 +650,6 @@ class CashRegisterApp(tk.Tk):
         self.cash_register_page.grid_remove()
         self.passcode_page.grid()
         self.passcode_entry.delete(0, tk.END)
-
-    def create_items_table(self):
-        conn = sqlite3.connect("cash_register.db")
-        cursor = conn.cursor()
-
-        cursor.execute("""
-        CREATE TABLE IF NOT EXISTS items (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL UNIQUE,
-            price REAL NOT NULL
-            quantity INTEGER NOT NULL
-        )
-        """)
-
-        conn.commit()
-        conn.close()
 
 if __name__ == "__main__":
     app = CashRegisterApp()
