@@ -1,5 +1,6 @@
 from PIL import Image
-
+import cv2
+import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 def display_images(change_dict, bill_and_coin_images):
@@ -42,7 +43,13 @@ def display_images(change_dict, bill_and_coin_images):
                 x_offset += img.width + 150
 
     # Show the output image with all the change images and quantities
-    output_image.show()
+    output_image_np = cv2.cvtColor(np.array(output_image), cv2.COLOR_RGB2BGR)
+    cv2.imshow("Change", output_image_np)
+    key = cv2.waitKey(5000)
+    if key == ord('q'):
+        cv2.destroyAllWindows()
+    else:
+        cv2.destroyAllWindows()
 
 
 def calculate_change(current_amount, target_amount):
