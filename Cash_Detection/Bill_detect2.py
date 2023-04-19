@@ -23,6 +23,7 @@ def detect_cash(target_amount):
 
     # Initialize variables
     total_amount = 0
+    detected_objects = []
     #cap = cv2.VideoCapture(0)
     cap = cv2.VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM),format=NV12,width=640,height=480,framerate=30/1 ! nvvidconv ! video/x-raw,format=BGRx ! videoconvert ! video/x-raw,format=BGR ! appsink drop=1", cv2.CAP_GSTREAMER)
     frames_to_live = 30
