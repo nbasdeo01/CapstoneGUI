@@ -3,6 +3,7 @@ import numpy as np
 import tkinter as tk
 from PIL import Image, ImageTk
 from threading import Thread, Lock
+import threading
 
 def detect_cash(target_amount):
     # Variables
@@ -12,14 +13,15 @@ def detect_cash(target_amount):
     window = None
     running = True
     total_amount = 0
-    process_frame = False
+    process_frame = threading.Event()
     frame_lock = Lock()
     shared_frame = None
 
     # Button Functions
     def on_detect_click():
-        nonlocal process_frame
-        process_frame = True
+        global process_frame
+        process_frame.set()
+        print("Detecting Cash...")
 
     def on_quit_click():
         nonlocal target_reached, running
@@ -28,6 +30,7 @@ def detect_cash(target_amount):
         if cap is not None:
             cap.release()
         window.destroy()
+        print("Quitting...")
 
     # Capture Frames
     def capture_frames():
@@ -35,6 +38,7 @@ def detect_cash(target_amount):
         cap = cv2.VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM),format=NV12,width=640,height=480,framerate=30/1 ! nvvidconv ! video/x-raw,format=BGRx ! videoconvert ! video/x-raw,format=BGR ! appsink drop=1", cv2.CAP_GSTREAMER)  # Change this to your camera source
         running = True
         while running:
+            print("Capturing Frames...")
             ret, frame = cap.read()
             if ret:
                 with frame_lock:
@@ -47,6 +51,7 @@ def detect_cash(target_amount):
     def update_image_label():
         nonlocal frame_label, shared_frame
         while not target_reached and running:
+            print("Updating Image Label...")
             with frame_lock:
                 if shared_frame is not None:
                     image = Image.fromarray(cv2.cvtColor(shared_frame, cv2.COLOR_BGR2RGB))
@@ -59,6 +64,8 @@ def detect_cash(target_amount):
     # Main Function
     def main_function():
         global total_amount
+        global process_frame
+        print("Starting Cash Detection...")
         def iou(box1, box2):
             x1, y1, w1, h1 = box1
             x2, y2, w2, h2 = box2
@@ -73,24 +80,28 @@ def detect_cash(target_amount):
             return iou
         # Load YOLOv3 network
         net = cv2.dnn.readNetFromDarknet("Cash_Detection/yolov3-tiny_testing.cfg", "Cash_Detection/yolov3-tiny_training_final.weights")
-
+        print("YOLOv3 network loaded successfully!")
         # Load list of classes
         with open("Cash_Detection/classes.txt") as f:
             classes = [line.strip() for line in f.readlines()]
+        print("Classes loaded successfully!")
 
         # Initialize variables
         total_amount = 0
         detected_objects = []
         frames_to_live = 30
-        process_frame = False
+        process_frame = threading.Event()
         target_reached = False
         
         while not target_reached and running:
+            print("Looping...")
             with frame_lock:
+                print("Copying Frame...")
                 if shared_frame is not None:
                     frame = shared_frame.copy()
-            if process_frame:
-                process_frame = False
+            if process_frame.wait(timeout=0.1):
+                print("Processing Frame...")
+                process_frame.clear()
                 if frame is not None:
                     ret, frame = cap.read()
                     if ret:
@@ -106,6 +117,7 @@ def detect_cash(target_amount):
                         cash_values = []
                         # Loop through each output layer and detect cash objects
                         for output in layer_outputs:
+                            print("Processing output")
                             for detection in output:
                                 scores = detection[5:]
                                 class_id = np.argmax(scores)
@@ -138,6 +150,7 @@ def detect_cash(target_amount):
                     # Only add the cash value if current_box does not match any box in prev_cash_objects
                             if not matched_prev_box:
                                 total_amount += cash_values[i]
+                                print("Total amount: ${:.2f}".format(total_amount))
                                 detected_objects.append({"box": current_box, "ttl": frames_to_live})
                         detected_objects = [{"box": obj["box"], "ttl": obj["ttl"] - 1} for obj in detected_objects if obj["ttl"] > 0]
 
@@ -149,6 +162,7 @@ def detect_cash(target_amount):
                 # Check if target amount has been reached
                         if total_amount >= target_amount:
                             target_reached = True
+                            print("Target amount reached!")
 
                     # Display message when target amount is reached
                         cv2.putText(frame, "Target amount reached!", (10, 110), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
@@ -166,8 +180,8 @@ def detect_cash(target_amount):
                 pass
             window.update_idletasks()
     # Release the camera and close all windows
-            cap.release()
-            cv2.destroyAllWindows()
+        cap.release()
+        cv2.destroyAllWindows()
 
     # Create GUI
     window = tk.Tk()
