@@ -4,6 +4,7 @@ import tkinter as tk
 from PIL import Image, ImageTk
 from threading import Thread, Lock
 import threading
+import time
 
 def detect_cash(target_amount):
     # Variables
@@ -13,14 +14,14 @@ def detect_cash(target_amount):
     window = None
     running = True
     total_amount = 0
-    process_frame = threading.Event()
+    process_frame = False
     frame_lock = Lock()
     shared_frame = None
 
     # Button Functions
     def on_detect_click():
         global process_frame
-        process_frame.set()
+        process_frame = True
         print("Detecting Cash...")
 
     def on_quit_click():
@@ -37,6 +38,8 @@ def detect_cash(target_amount):
         nonlocal cap, running, shared_frame
         cap = cv2.VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM),format=NV12,width=640,height=480,framerate=30/1 ! nvvidconv ! video/x-raw,format=BGRx ! videoconvert ! video/x-raw,format=BGR ! appsink drop=1", cv2.CAP_GSTREAMER)  # Change this to your camera source
         running = True
+        main_function_thread = Thread(target=main_function)
+        main_function_thread.start()
         while running:
             print("Capturing Frames...")
             ret, frame = cap.read()
@@ -54,11 +57,13 @@ def detect_cash(target_amount):
             print("Updating Image Label...")
             with frame_lock:
                 if shared_frame is not None:
+                    cv2.putText(shared_frame, "Total amount: ${:.2f}".format(total_amount), (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
+                    cv2.putText(shared_frame, "Amount needed: ${:.2f}".format(target_amount - total_amount), (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
+                    cv2.putText(shared_frame, "Press 'Detect' to detect, 'Quit' to add coins", (10, 150), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
                     image = Image.fromarray(cv2.cvtColor(shared_frame, cv2.COLOR_BGR2RGB))
-                    image = image.resize((640, 360), Image.ANTIALIAS)
                     photo = ImageTk.PhotoImage(image)
                     frame_label.config(image=photo)
-                    frame_label.image = photo
+                    frame_label.photo = photo
             window.update_idletasks()
 
     # Main Function
@@ -90,7 +95,7 @@ def detect_cash(target_amount):
         total_amount = 0
         detected_objects = []
         frames_to_live = 30
-        process_frame = threading.Event()
+        process_frame = False
         target_reached = False
         
         while not target_reached and running:
@@ -99,9 +104,9 @@ def detect_cash(target_amount):
                 print("Copying Frame...")
                 if shared_frame is not None:
                     frame = shared_frame.copy()
-            if process_frame.wait(timeout=0.1):
+            if process_frame:
+                process_frame = False
                 print("Processing Frame...")
-                process_frame.clear()
                 if frame is not None:
                     ret, frame = cap.read()
                     if ret:
@@ -169,16 +174,9 @@ def detect_cash(target_amount):
                         break
         # Display the total amount and change required on the frame
                 frame_lock.acquire()
-                cv2.putText(frame, "Total amount: ${:.2f}".format(total_amount), (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
-                cv2.putText(frame, "Amount needed: ${:.2f}".format(target_amount - total_amount), (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
-                cv2.putText(frame, "Press 'Detect' to detect, 'Quit' to add coins", (10, 150), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
-                image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-                photo = ImageTk.PhotoImage(image)
-                frame_label.config(image=photo)
-                frame_label.photo = photo
                 frame_lock.release()
                 pass
-            window.update_idletasks()
+            time.sleep(0.01)
     # Release the camera and close all windows
         cap.release()
         cv2.destroyAllWindows()
@@ -204,9 +202,6 @@ def detect_cash(target_amount):
     # Start Threads
     capture_frames_thread = Thread(target=capture_frames)
     capture_frames_thread.start()
-
-    main_function_thread = Thread(target=main_function)
-    main_function_thread.start()
 
     update_image_thread = Thread(target=update_image_label)
     update_image_thread.start()
