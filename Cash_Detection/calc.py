@@ -13,11 +13,9 @@ def display_images(change_dict, bill_and_coin_images):
     x_offset, y_offset = 10, 10
 
     # Load a font for displaying the quantity text
-    font_path = "server/detection/Detection_1_2/LiberationSerif-Regular.ttf"  # Update the path accordingly
+    font_path = "Cash_Detection/LiberationSerif-Regular.ttf"  # Update the path accordingly
     font_size = 36
     font = ImageFont.truetype(font_path, font_size)
-
-
 
     draw = ImageDraw.Draw(output_image)
 
