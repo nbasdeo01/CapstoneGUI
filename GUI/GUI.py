@@ -292,6 +292,10 @@ class CashRegisterApp(tk.Tk):
             speech = "The cart contains: "
             for item in cart_items:
                 speech += f"{item}, "
+            speech = speech[:-2] + ". "  # Remove the last comma and space, add a period
+            # Format the total as dollars and cents
+            total_dollars, total_cents = divmod(int(self.total * 100), 100)
+            speech += f"The cart total is: {total_dollars} dollars and {total_cents} cents, "
         tts = gTTS(speech, lang='en')
         tts.save("cart_description.mp3")
         playsound("cart_description.mp3")
@@ -317,7 +321,6 @@ class CashRegisterApp(tk.Tk):
             self.cart.delete(self.cart.curselection())
         except:
             messagebox.showerror("Error", "Please select an item to remove.")
-
 
     def create_passcode_page(self):
         self.passcode_page = tk.Frame(self, bg="#F5F5F5")
