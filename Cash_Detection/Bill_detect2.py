@@ -15,10 +15,10 @@ def detect_cash(target_amount):
         iou = intersection_area / union_area
         return iou
     # Load YOLOv3 network
-    net = cv2.dnn.readNetFromDarknet("/home/jetson/Desktop/CapstoneGUI/Cash_Detection/yolov3-tiny_testing.cfg", "/home/jetson/Desktop/CapstoneGUI/Cash_Detection/yolov3-tiny_training_final.weights")
+    net = cv2.dnn.readNetFromDarknet("/home/jetson/CapstoneGUI/Cash_Detection/yolov3-tiny_testing.cfg", "/home/jetson/CapstoneGUI/Cash_Detection/yolov3-tiny_training_final.weights")
 
     # Load list of classes
-    with open("/home/jetson/Desktop/CapstoneGUI/Cash_Detection/classes.txt") as f:
+    with open("/home/jetson/CapstoneGUI/Cash_Detection/classes.txt") as f:
         classes = [line.strip() for line in f.readlines()]
 
     # Initialize variables

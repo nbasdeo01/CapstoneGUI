@@ -3,17 +3,16 @@ import numpy as np
 
 def detect_cash(target_amount):
     # Load YOLOv3 network
-    net = cv2.dnn.readNetFromDarknet("/home/jetson/Desktop/CapstoneGUI/Cash_Detection/yolov3-tiny_testing.cfg", "/home/jetson/Desktop/CapstoneGUI/Cash_Detection/yolov3-tiny_training_final.weights")
+    net = cv2.dnn.readNetFromDarknet("/home/jetson/CapstoneGUI/Cash_Detection/yolov3-tiny_testing.cfg", "/home/jetson/CapstoneGUI/Cash_Detection/yolov3-tiny_training_final.weights")
 
     # Load list of classes
-    with open("/home/jetson/Desktop/CapstoneGUI/Cash_Detection/classes.txt") as f:
+    with open("/home/jetson/CapstoneGUI/Cash_Detection/classes.txt") as f:
         classes = [line.strip() for line in f.readlines()]
 
     # Initialize variables
     total_amount = 0
     #cap = cv2.VideoCapture(0)
     cap = cv2.VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM),format=NV12,width=640,height=480,framerate=30/1 ! nvvidconv ! video/x-raw,format=BGRx ! videoconvert ! video/x-raw,format=BGR ! appsink drop=1", cv2.CAP_GSTREAMER)
-    
     target_reached = False
     
 
@@ -85,5 +84,5 @@ def detect_cash(target_amount):
     cap.release()
     cv2.destroyAllWindows()
     return total_amount
-
+detect_cash(10)
 

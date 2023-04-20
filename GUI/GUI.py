@@ -403,7 +403,7 @@ class CashRegisterApp(tk.Tk):
 
     def process_payment(self):
         try:
-            main_py_path = "//home//jetson//Desktop//CapstoneGUI//Cash_Detection//main.py"
+            main_py_path = "//home//jetson//CapstoneGUI//Cash_Detection//main.py"
             subprocess.run(["python", main_py_path, str(self.total)], check=True)
             # Insert the transaction data into the database
             print(f"Items: {self.items}")
