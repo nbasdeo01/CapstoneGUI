@@ -46,8 +46,8 @@ def detect_cash(target_amount):
     cap = cv2.VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM),format=NV12,width=640,height=480,framerate=30/1 ! nvvidconv ! video/x-raw,format=BGRx ! videoconvert ! video/x-raw,format=BGR ! appsink drop=1", cv2.CAP_GSTREAMER)
     frames_to_live = 30
     target_reached = False
-    detect_button_rect = (50, 430, 100, 30)
-    quit_button_rect = (180, 430, 100, 30)
+    detect_button_rect = (50, 430, 150, 50)
+    quit_button_rect = (220, 430, 150, 50)
 
     while True:
         # Check for keypress
@@ -148,4 +148,4 @@ def detect_cash(target_amount):
     cv2.destroyAllWindows()
     return total_amount
 
-
+detect_cash(5)
