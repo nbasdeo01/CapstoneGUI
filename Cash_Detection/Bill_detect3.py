@@ -1,7 +1,10 @@
 import cv2
 import numpy as np
 
-def detect_cash(target_amount, detect_callback):
+import cv2
+import numpy as np
+
+def detect_cash(target_amount):
 
     def is_inside(pos, rect):
         x, y, w, h = rect
@@ -11,17 +14,16 @@ def detect_cash(target_amount, detect_callback):
     detect_flag = False
     quit_flag = False
     def on_mouse_click(event, x, y, flags, param):
-        global detect_flag, quit_flag
+        nonlocal detect_flag, quit_flag
         if event == cv2.EVENT_LBUTTONDOWN:
             if is_inside((x, y), detect_button_rect):
                 detect_flag = True
-                detect_callback()  # Add this line
             elif is_inside((x, y), quit_button_rect):
                 quit_flag = True
-   
-    def create_opencv_window():
-        cv2.namedWindow("Cash Detection")
-        cv2.setMouseCallback("Cash Detection", on_mouse_click)
+
+    # Create the OpenCV window and set the mouse callback
+    cv2.namedWindow("Cash Detection")
+    cv2.setMouseCallback("Cash Detection", on_mouse_click)
 
     def iou(box1, box2):
         x1, y1, w1, h1 = box1
@@ -42,7 +44,6 @@ def detect_cash(target_amount, detect_callback):
     with open("/home/jetson/CapstoneGUI/Cash_Detection/classes.txt") as f:
         classes = [line.strip() for line in f.readlines()]
 
-    create_opencv_window()
     # Initialize variables
     total_amount = 0
     detected_objects = []
