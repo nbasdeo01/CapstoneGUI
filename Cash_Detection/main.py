@@ -1,5 +1,5 @@
 from Bill_detect3 import detect_cash
-from Coin_detect import update_total_price
+from Coin_detect2 import update_total_price
 from calc import calculate_change, display_images, load_bill_and_coin_images
 import open_cash_box
 
