@@ -23,18 +23,14 @@ def main(target_amount):
         change_dict = calculate_change(updated_total_amount, target_amount)
 
     # Check if there is any change due
-    if sum(change_dict.values()) > 0:
-        # Load bill and coin images
-        bill_and_coin_images = load_bill_and_coin_images()
+        if sum(change_dict.values()) > 0:
+            # Load bill and coin images
+            bill_and_coin_images = load_bill_and_coin_images()
 
-        # Display images
-        display_images(change_dict, bill_and_coin_images)
-
-        
-        
-
-    else:
-        print("No change due. Not opening cash register box.")
+            # Display images
+            display_images(change_dict, bill_and_coin_images)
+        else:
+            print("No change due. Not opening cash register box.")
 
 
 if __name__ == "__main__":
