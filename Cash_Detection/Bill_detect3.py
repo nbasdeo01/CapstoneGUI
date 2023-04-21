@@ -1,21 +1,27 @@
 import cv2
 import numpy as np
 
-def detect_cash(target_amount):
-     
-    def on_detect_button(state):
-        nonlocal detect_flag
-        detect_flag = True
+def detect_cash(target_amount, detect_callback):
 
-    def on_quit_button(state):
-        nonlocal quit_flag
-        quit_flag = True
-
+    def is_inside(pos, rect):
+        x, y, w, h = rect
+        px, py = pos
+        return x < px < x + w and y < py < y + h
+    
+    detect_flag = False
+    quit_flag = False
+    def on_mouse_click(event, x, y, flags, param):
+        nonlocal detect_flag, quit_flag
+        if event == cv2.EVENT_LBUTTONDOWN:
+            if is_inside((x, y), detect_button_rect):
+                detect_flag = True
+                detect_callback()  # Add this line
+            elif is_inside((x, y), quit_button_rect):
+                quit_flag = True
    
     def create_opencv_window():
         cv2.namedWindow("Cash Detection")
-        cv2.createButton("Detect", on_detect_button, None, cv2.QT_PUSH_BUTTON, 1)
-        cv2.createButton("Quit", on_quit_button, None, cv2.QT_PUSH_BUTTON, 1)
+        cv2.setMouseCallback("Cash Detection", on_mouse_click)
 
     def iou(box1, box2):
         x1, y1, w1, h1 = box1
@@ -57,7 +63,6 @@ def detect_cash(target_amount):
 
         # If "d" key is pressed, process a single frame
         elif detect_flag:
-            detect_flag = False
             detection_running = True
             target_reached = False
             ret, frame = cap.read()
