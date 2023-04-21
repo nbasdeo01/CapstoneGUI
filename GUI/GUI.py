@@ -595,7 +595,9 @@ class CashRegisterApp(tk.Tk):
         if result is not None:
             self.passcode_page.grid_remove()
             self.cash_register_page.grid()
-            if entered_passcode == admin_password1 or admin_password2:
+            if entered_passcode == admin_password1:
+                self.admin = True
+            elif entered_passcode == admin_password2:
                 self.admin = True
             else:
                 self.admin = False
@@ -682,7 +684,6 @@ class CashRegisterApp(tk.Tk):
         cursor.execute("SELECT name, price, quantity FROM items")  # Add the quantity column here
         items = cursor.fetchall()
         conn.close()
-
         for item in items:
             item_name, item_price, item_quantity = item  # Add the item_quantity variable here
             self.item_listbox.insert(tk.END, f"{item_name} - ${item_price:.2f} - Quantity: {item_quantity}")  # Show the quantity
