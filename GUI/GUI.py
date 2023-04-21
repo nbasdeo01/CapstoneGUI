@@ -595,12 +595,11 @@ class CashRegisterApp(tk.Tk):
         if result is not None:
             self.passcode_page.grid_remove()
             self.cash_register_page.grid()
-            if entered_passcode == admin_password1:
-                self.admin = True
-            elif entered_passcode == admin_password2:
+            if entered_passcode == admin_password1 or admin_password2:
                 self.admin = True
             else:
                 self.admin = False
+
             if self.admin:
                 self.add_user_button.grid()  # Show the "Add User" button for the admin user
                 self.delete_user_button.grid()  # Show the "Delete User" button for the admin user
