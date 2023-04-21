@@ -147,9 +147,11 @@ def detect_cash(target_amount):
         quit_flag = False
         # Display the frame
         cv2.imshow("Cash Detection", frame)
+        key = cv2.waitKey(1) & 0xFF
     # Release the camera and close all windows
     cap.release()
     cv2.destroyAllWindows()
     return total_amount
 
 
+detect_cash(5)
