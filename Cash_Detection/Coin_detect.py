@@ -22,6 +22,7 @@ def update_total_price(total_amount, target_amount):
     params.filterByInertia = True
     params.minInertiaRatio = 0.1
     detector = cv2.SimpleBlobDetector_create(params)
+    #cap = cv2.VideoCapture(0)
     cap = cv2.VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM),format=NV12,width=640,height=480,framerate=30/1 ! nvvidconv ! video/x-raw,format=BGRx ! videoconvert ! video/x-raw,format=BGR ! appsink drop=1", cv2.CAP_GSTREAMER)
 
     total_amount = total_amount
