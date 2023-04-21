@@ -11,7 +11,7 @@ def detect_cash(target_amount, detect_callback):
     detect_flag = False
     quit_flag = False
     def on_mouse_click(event, x, y, flags, param):
-        nonlocal detect_flag, quit_flag
+        global detect_flag, quit_flag
         if event == cv2.EVENT_LBUTTONDOWN:
             if is_inside((x, y), detect_button_rect):
                 detect_flag = True
@@ -151,4 +151,4 @@ def detect_cash(target_amount, detect_callback):
     cv2.destroyAllWindows()
     return total_amount
 
-detect_cash(10)
+
