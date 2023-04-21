@@ -1,8 +1,9 @@
 import cv2
 import numpy as np
+import pyttsx3
 
 def detect_cash(target_amount):
-
+    engine = pyttsx3.init()
     def is_inside(pos, rect):
         x, y, w, h = rect
         px, py = pos
@@ -113,6 +114,9 @@ def detect_cash(target_amount):
                         total_amount += cash_values[i]
                         print("Total amount: ${:.2f}".format(total_amount))
                         detected_objects.append({"box": current_box, "ttl": frames_to_live})
+                        bill_or_coin = classes[class_id].replace("_", " ")
+                        engine.say(f"{bill_or_coin} detected.")
+                        engine.runAndWait()
                 detected_objects = [{"box": obj["box"], "ttl": obj["ttl"] - 1} for obj in detected_objects if obj["ttl"] > 0]
 
 
