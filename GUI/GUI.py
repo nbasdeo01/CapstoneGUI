@@ -121,27 +121,31 @@ class CashRegisterApp(tk.Tk):
         self.transactions_button.grid(row=3, column=2, padx=20, pady=10, ipadx=20, ipady=10)
 
         # Place this code within your create_cash_register_page() function
-        self.add_item_label = tk.Label(self.cash_register_page, text="Enter Item Name: ", font=("Open Sans", 16))
-        self.add_item_label.grid(row=5, column=0, pady=10)
+        # Create a frame to contain labels and text fields
+        input_frame = tk.Frame(self.cash_register_page)
+        input_frame.grid(row=5, column=0, columnspan=2, pady=10)
+
+        self.add_item_label = tk.Label(input_frame, text="Enter Item Name: ", font=("Open Sans", 16))
+        self.add_item_label.grid(row=0, column=0, pady=1, padx=5)
 
         # Item name entry
-        self.item_name_entry = ttk.Entry(self.cash_register_page)
-        self.item_name_entry.grid(row=5, column=1, pady=10)
+        self.item_name_entry = ttk.Entry(input_frame)
+        self.item_name_entry.grid(row=0, column=1, pady=1, padx=5)
 
         # Item price entry
-        self.item_price_entry = ttk.Entry(self.cash_register_page)
-        self.item_price_entry.grid(row=6, column=1, pady=10)
-        self.item_price_label = tk.Label(self.cash_register_page, text="Price", font=("Open Sans", 16))
-        self.item_price_label.grid(row=6, column=0)
+        self.item_price_entry = ttk.Entry(input_frame)
+        self.item_price_entry.grid(row=1, column=1, pady=1, padx=5)
+        self.item_price_label = tk.Label(input_frame, text="Price", font=("Open Sans", 16))
+        self.item_price_label.grid(row=1, column=0, pady=1, padx=5)
 
         # Item image path entry
-        self.item_image_entry = ttk.Entry(self.cash_register_page)
-        self.item_image_entry.grid(row=7, column=1, pady=10)
+        self.item_image_entry = ttk.Entry(input_frame)
+        self.item_image_entry.grid(row=2, column=1, pady=1, padx=5)
 
-        self.new_item_quantity_entry = tk.Entry(self.cash_register_page)
-        self.new_item_quantity_entry.grid(row=7, column=1, pady=10)
-        self.new_item_quantity_label = tk.Label(self.cash_register_page, text="Quantity", font=("Open Sans", 16))
-        self.new_item_quantity_label.grid(row=7, column=0)
+        self.new_item_quantity_entry = tk.Entry(input_frame)
+        self.new_item_quantity_entry.grid(row=3, column=1, pady=1, padx=5)
+        self.new_item_quantity_label = tk.Label(input_frame, text="Quantity", font=("Open Sans", 16))
+        self.new_item_quantity_label.grid(row=3, column=0, pady=1, padx=5)
 
         # Add item button
         self.add_item_button = tk.Button(self.cash_register_page, text="Add Item", font=("Open Sans", 16), command=lambda: self.add_item_to_db(self.item_name_entry.get(), self.item_price_entry.get(), self.item_image_entry.get(), self.new_item_quantity_entry.get()))
@@ -417,7 +421,7 @@ class CashRegisterApp(tk.Tk):
     def create_remove_button(self):
         remove_label = tk.Label(self.cash_register_page, text="Tap an item in the cart\nto remove it", font=("Open Sans", 16), bg="#F5F5F5", fg="#333333")
         remove_label.grid(row=3, column=3, padx=20, pady=10)
-        self.remove_button = tk.Button(self.cash_register_page, text="Remove Item from Cart", font=("Open Sans", 16), command=self.remove_item, bg="#FF5722", fg="#FFFFFF", relief="groove", borderwidth=2)
+        self.remove_button = tk.Button(self.cash_register_page, text="Remove Item", font=("Open Sans", 16), command=self.remove_item, bg="#FF5722", fg="#FFFFFF", relief="groove", borderwidth=2)
         self.remove_button.grid(row=4, column=3, padx=20, pady=10, ipadx=20, ipady=10)
 
     def add_item_price(self, price, item_name):
