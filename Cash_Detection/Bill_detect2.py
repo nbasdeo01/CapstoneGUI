@@ -125,4 +125,4 @@ def detect_cash(target_amount):
     cv2.destroyAllWindows()
     return total_amount
 
-detect_cash(10)
+
