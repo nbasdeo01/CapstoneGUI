@@ -1,9 +1,6 @@
 import cv2
 import numpy as np
 
-import cv2
-import numpy as np
-
 def detect_cash(target_amount):
 
     def is_inside(pos, rect):
@@ -11,15 +8,13 @@ def detect_cash(target_amount):
         px, py = pos
         return x < px < x + w and y < py < y + h
     
-    detect_flag = False
-    quit_flag = False
+    detect_quit_flags = [False, False]
     def on_mouse_click(event, x, y, flags, param):
-        nonlocal detect_flag, quit_flag
         if event == cv2.EVENT_LBUTTONDOWN:
             if is_inside((x, y), detect_button_rect):
-                detect_flag = True
+                detect_quit_flags[0] = True
             elif is_inside((x, y), quit_button_rect):
-                quit_flag = True
+                detect_quit_flags[1] = True
 
     # Create the OpenCV window and set the mouse callback
     cv2.namedWindow("Cash Detection")
@@ -59,11 +54,11 @@ def detect_cash(target_amount):
         ret, frame = cap.read()
 
         # If "q" key is pressed, quit the program and close all windows
-        if quit_flag:
+        if detect_quit_flags[1]:
             break
 
         # If "d" key is pressed, process a single frame
-        elif detect_flag:
+        elif detect_quit_flags[0]:
             detection_running = True
             target_reached = False
             ret, frame = cap.read()
@@ -143,8 +138,8 @@ def detect_cash(target_amount):
         cv2.putText(frame, "Total amount: ${:.2f}".format(total_amount), (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
         cv2.putText(frame, "Amount needed: ${:.2f}".format(target_amount - total_amount), (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
         cv2.putText(frame, "Press 'd' to detect, 'q' to add coins", (10, 150), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
-        detect_flag = False
-        quit_flag = False
+        detect_quit_flags[0] = False
+        detect_quit_flags[1] = False
         # Display the frame
         cv2.imshow("Cash Detection", frame)
         key = cv2.waitKey(1) & 0xFF
