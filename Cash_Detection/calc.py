@@ -91,16 +91,16 @@ def main():
 
 def load_bill_and_coin_images():
     return {
-        "$100 bill": Image.open("/home/jetson/Desktop/CapstoneGUI/Cash_Detection/images/100.jpg"),
-        "$50 bill": Image.open("/home/jetson/Desktop/CapstoneGUI/Cash_Detection/images/50.jpg"),
-        "$20 bill": Image.open("/home/jetson/Desktop/CapstoneGUI/Cash_Detection/images/20.jpg"),
-        "$10 bill": Image.open("/home/jetson/Desktop/CapstoneGUI/Cash_Detection/images/10.jpg"),
-        "$5 bill": Image.open("/home/jetson/Desktop/CapstoneGUI/Cash_Detection/images/5.jpg"),
-        "$1 bill": Image.open("/home/jetson/Desktop/CapstoneGUI/Cash_Detection/images/1.jpg"),
-        "quarter": Image.open("/home/jetson/Desktop/CapstoneGUI/Cash_Detection/images/.25.jpg"),
-        "dime": Image.open("/home/jetson/Desktop/CapstoneGUI/Cash_Detection/images/.10.jpg"),
-        "nickel": Image.open("/home/jetson/Desktop/CapstoneGUI/Cash_Detection/images/.5.jpg"),
-        "penny": Image.open("/home/jetson/Desktop/CapstoneGUI/Cash_Detection/images/.1.jpg"),
+        "$100 bill": Image.open("/home/jetson/CapstoneGUI/Cash_Detection/images/100.jpg"),
+        "$50 bill": Image.open("/home/jetson/CapstoneGUI/Cash_Detection/images/50.jpg"),
+        "$20 bill": Image.open("/home/jetson/CapstoneGUI/Cash_Detection/images/20.jpg"),
+        "$10 bill": Image.open("/home/jetson/CapstoneGUI/Cash_Detection/images/10.jpg"),
+        "$5 bill": Image.open("/home/jetson/CapstoneGUI/Cash_Detection/images/5.jpg"),
+        "$1 bill": Image.open("/home/jetson/CapstoneGUI/Cash_Detection/images/1.jpg"),
+        "quarter": Image.open("/home/jetson/CapstoneGUI/Cash_Detection/images/.25.jpg"),
+        "dime": Image.open("/home/jetson/CapstoneGUI/Cash_Detection/images/.10.jpg"),
+        "nickel": Image.open("/home/jetson/CapstoneGUI/Cash_Detection/images/.5.jpg"),
+        "penny": Image.open("/home/jetson/CapstoneGUI/Cash_Detection/images/.1.jpg"),
     }
 
 if __name__ == "__main__":
