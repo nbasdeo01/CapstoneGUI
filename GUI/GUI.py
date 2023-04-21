@@ -194,8 +194,8 @@ class CashRegisterApp(tk.Tk):
         if not os.path.exists(save_directory):
             os.makedirs(save_directory)
         # Open the camera
-        #cap = cv2.VideoCapture(0)
-        cap = cv2.VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM),format=NV12,width=640,height=480,framerate=30/1 ! nvvidconv ! video/x-raw,format=BGRx ! videoconvert ! video/x-raw,format=BGR ! appsink drop=1", cv2.CAP_GSTREAMER)
+        cap = cv2.VideoCapture(0)
+        #cap = cv2.VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM),format=NV12,width=640,height=480,framerate=30/1 ! nvvidconv ! video/x-raw,format=BGRx ! videoconvert ! video/x-raw,format=BGR ! appsink drop=1", cv2.CAP_GSTREAMER)
 
         # Check if the camera is opened successfully
         if not cap.isOpened():
@@ -595,11 +595,12 @@ class CashRegisterApp(tk.Tk):
         if result is not None:
             self.passcode_page.grid_remove()
             self.cash_register_page.grid()
-            if entered_passcode == admin_password1 or admin_password2:
+            if entered_passcode == admin_password1:
+                self.admin = True
+            elif entered_passcode == admin_password2:
                 self.admin = True
             else:
                 self.admin = False
-
             if self.admin:
                 self.add_user_button.grid()  # Show the "Add User" button for the admin user
                 self.delete_user_button.grid()  # Show the "Delete User" button for the admin user
