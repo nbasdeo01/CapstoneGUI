@@ -1,9 +1,10 @@
 import cv2
 import numpy as np
 import pyttsx3
+from gtts import gTTS
+import os
 
 def detect_cash(target_amount):
-    engine = pyttsx3.init()
     def is_inside(pos, rect):
         x, y, w, h = rect
         px, py = pos
@@ -115,8 +116,12 @@ def detect_cash(target_amount):
                         print("Total amount: ${:.2f}".format(total_amount))
                         detected_objects.append({"box": current_box, "ttl": frames_to_live})
                         bill_or_coin = classes[class_id].replace("_", " ")
-                        engine.say(f"{bill_or_coin} detected.")
-                        engine.runAndWait()
+                        tts = gTTS(text=f"{bill_or_coin} detected.", lang='en')
+                        tts.save("temp_speech.mp3")
+                        if os.name == 'posix':  # Linux or macOS
+                            os.system("mpg321 temp_speech.mp3")
+                        else:  # Windows
+                            os.system("start temp_speech.mp3")
                 detected_objects = [{"box": obj["box"], "ttl": obj["ttl"] - 1} for obj in detected_objects if obj["ttl"] > 0]
 
 
