@@ -3,6 +3,7 @@ import numpy as np
 import pyttsx3
 from gtts import gTTS
 import os
+import tempfile
 
 def detect_cash(target_amount):
     def is_inside(pos, rect):
@@ -120,9 +121,16 @@ def detect_cash(target_amount):
                             spoken_bill_or_coin = f"{bill_or_coin.split()[1]} dollar bill"
                         elif bill_or_coin.startswith("coin"):
                             spoken_bill_or_coin = f"{bill_or_coin.split()[1]} coin"
+                        
+                        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as f:
+                            temp_filename = f.name
+                        
                         tts = gTTS(text=f"{spoken_bill_or_coin} detected.", lang='en')
-                        tts.save("temp_speech.mp3")
-                        os.system("mpg321 temp_speech.mp3")
+                        tts.save(temp_filename)
+                        os.system(f"mpg321 {temp_filename}")
+
+                        # Remove the temporary speech file
+                        os.remove(temp_filename)
                 detected_objects = [{"box": obj["box"], "ttl": obj["ttl"] - 1} for obj in detected_objects if obj["ttl"] > 0]
 
 
