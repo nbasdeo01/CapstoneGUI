@@ -43,7 +43,7 @@ def display_images(change_dict, bill_and_coin_images):
     # Show the output image with all the change images and quantities
     output_image_np = cv2.cvtColor(np.array(output_image), cv2.COLOR_RGB2BGR)
     cv2.imshow("Change", output_image_np)
-    key = cv2.waitKey(20000)
+    key = cv2.waitKey(5000)
     if key == ord('q'):
         cv2.destroyAllWindows()
     else:
