@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import cv2
 import numpy as np
 import keyboard
@@ -34,18 +35,18 @@ def detect_cash(target_amount):
         iou = intersection_area / union_area
         return iou
     # Load YOLOv3 network
-    net = cv2.dnn.readNetFromDarknet("Cash_Detection\yolov3-tiny_testing.cfg", "Cash_Detection\yolov3-tiny_training_final.weights")
+    net = cv2.dnn.readNetFromDarknet("/home/jetson/CapstoneGUI/Cash_Detection/yolov3-tiny_testing.cfg", "/home/jetson/CapstoneGUI/Cash_Detection/yolov3-tiny_training_final.weights")
 
     # Load list of classes
-    with open("Cash_Detection\classes.txt") as f:
+    with open("/home/jetson/CapstoneGUI/Cash_Detection/classes.txt") as f:
         classes = [line.strip() for line in f.readlines()]
 
     create_opencv_window()
     # Initialize variables
     total_amount = 0
     detected_objects = []
-    cap = cv2.VideoCapture(0)
-    #cap = cv2.VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM),format=NV12,width=640,height=480,framerate=30/1 ! nvvidconv ! video/x-raw,format=BGRx ! videoconvert ! video/x-raw,format=BGR ! appsink drop=1", cv2.CAP_GSTREAMER)
+    #cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM),format=NV12,width=640,height=480,framerate=30/1 ! nvvidconv ! video/x-raw,format=BGRx ! videoconvert ! video/x-raw,format=BGR ! appsink drop=1", cv2.CAP_GSTREAMER)
     frames_to_live = 30
     target_reached = False
     detect_button_rect = (10, 180, 100, 30)
