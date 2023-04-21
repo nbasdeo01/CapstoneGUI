@@ -25,13 +25,12 @@ def main(target_amount):
     if sum(change_dict.values()) > 0:
         # Load bill and coin images
         bill_and_coin_images = load_bill_and_coin_images()
-
+        #Open register
+        open_cash_box.open_cash_register()
         # Display images
         display_images(change_dict, bill_and_coin_images)
     else:
         print("No change due. Not opening cash register box.")
-    total_amount = 0
-    detect_cash(target_amount)
 
 if __name__ == "__main__":
     import sys

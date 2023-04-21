@@ -149,4 +149,3 @@ def detect_cash(target_amount):
     return total_amount
 
 
-detect_cash(5)
