@@ -25,12 +25,12 @@ def main(target_amount):
     if sum(change_dict.values()) > 0:
         # Load bill and coin images
         bill_and_coin_images = load_bill_and_coin_images()
-
+        # Call the function to open the cash register box
+        open_cash_box.open_cash_register()
         # Display images
         display_images(change_dict, bill_and_coin_images)
 
-        # Call the function to open the cash register box
-        open_cash_box.open_cash_register()
+        
         
 
     else:
