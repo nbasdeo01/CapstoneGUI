@@ -1,22 +1,21 @@
-#!/usr/bin/env python3
 import cv2
 import numpy as np
-import keyboard
 
 def detect_cash(target_amount):
     def is_inside(pos, rect):
         x, y, w, h = rect
         px, py = pos
         return x < px < x + w and y < py < y + h
-
+    
+    detect_flag = False
+    quit_flag = False
     def on_mouse_click(event, x, y, flags, param):
+        nonlocal detect_flag, quit_flag
         if event == cv2.EVENT_LBUTTONDOWN:
             if is_inside((x, y), detect_button_rect):
-                keyboard.press('d')
-                keyboard.release('d')
+                detect_flag = True
             elif is_inside((x, y), quit_button_rect):
-                keyboard.press('q')
-                keyboard.release('q')
+                quit_flag = True
 
     def create_opencv_window():
         cv2.namedWindow("Cash Detection")
@@ -55,14 +54,13 @@ def detect_cash(target_amount):
     while True:
         # Check for keypress
         ret, frame = cap.read()
-        key = cv2.waitKey(1) & 0xFF
 
         # If "q" key is pressed, quit the program and close all windows
-        if key == ord("q"):
+        if quit_flag:
             break
 
         # If "d" key is pressed, process a single frame
-        elif key == ord("d"):
+        elif detect_flag:
             detection_running = True
             target_reached = False
             ret, frame = cap.read()
@@ -134,7 +132,6 @@ def detect_cash(target_amount):
                 cv2.putText(frame, "Target amount reached!", (10, 110), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
                 break
         # Display the total amount and change required on the frame
-        mouse_click = cv2.waitKey(1) & 0xFF
         cv2.rectangle(frame, (detect_button_rect[0], detect_button_rect[1]), (detect_button_rect[0] + detect_button_rect[2], detect_button_rect[1] + detect_button_rect[3]), (0, 255, 0), 2)
         cv2.putText(frame, "Detect", (detect_button_rect[0] + 10, detect_button_rect[1] + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
         cv2.rectangle(frame, (quit_button_rect[0], quit_button_rect[1]), (quit_button_rect[0] + quit_button_rect[2], quit_button_rect[1] + quit_button_rect[3]), (0, 255, 0), 2)
@@ -143,8 +140,8 @@ def detect_cash(target_amount):
         cv2.putText(frame, "Total amount: ${:.2f}".format(total_amount), (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
         cv2.putText(frame, "Amount needed: ${:.2f}".format(target_amount - total_amount), (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
         cv2.putText(frame, "Press 'd' to detect, 'q' to add coins", (10, 150), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
-
-
+        detect_flag = False
+        quit_flag = False
         # Display the frame
         cv2.imshow("Cash Detection", frame)
     # Release the camera and close all windows
