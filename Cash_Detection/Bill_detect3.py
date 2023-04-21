@@ -46,8 +46,8 @@ def detect_cash(target_amount):
     cap = cv2.VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM),format=NV12,width=640,height=480,framerate=30/1 ! nvvidconv ! video/x-raw,format=BGRx ! videoconvert ! video/x-raw,format=BGR ! appsink drop=1", cv2.CAP_GSTREAMER)
     frames_to_live = 30
     target_reached = False
-    detect_button_rect = (10, 180, 100, 30)
-    quit_button_rect = (120, 180, 100, 30)
+    detect_button_rect = (50, 430, 100, 30)
+    quit_button_rect = (180, 430, 100, 30)
 
     while True:
         # Check for keypress
@@ -132,12 +132,12 @@ def detect_cash(target_amount):
         # Display the total amount and change required on the frame
         cv2.rectangle(frame, (detect_button_rect[0], detect_button_rect[1]), (detect_button_rect[0] + detect_button_rect[2], detect_button_rect[1] + detect_button_rect[3]), (0, 255, 0), 2)
         cv2.putText(frame, "Detect", (detect_button_rect[0] + 10, detect_button_rect[1] + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
-        cv2.rectangle(frame, (quit_button_rect[0], quit_button_rect[1]), (quit_button_rect[0] + quit_button_rect[2], quit_button_rect[1] + quit_button_rect[3]), (0, 255, 0), 2)
-        cv2.putText(frame, "Quit", (quit_button_rect[0] + 20, quit_button_rect[1] + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+        cv2.rectangle(frame, (quit_button_rect[0], quit_button_rect[1]), (quit_button_rect[0] + quit_button_rect[2], quit_button_rect[1] + quit_button_rect[3]), (255, 0, 0), 2)
+        cv2.putText(frame, "Coins", (quit_button_rect[0] + 20, quit_button_rect[1] + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
         # Display the total amount and change required on the frame
         cv2.putText(frame, "Total amount: ${:.2f}".format(total_amount), (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
         cv2.putText(frame, "Amount needed: ${:.2f}".format(target_amount - total_amount), (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
-        cv2.putText(frame, "Press 'd' to detect, 'q' to add coins", (10, 150), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+        #cv2.putText(frame, "Press 'd' to detect, 'q' to add coins", (10, 150), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
         detect_quit_flags[0] = False
         detect_quit_flags[1] = False
         # Display the frame
