@@ -2,40 +2,9 @@ import cv2
 import numpy as np
 import os
 from gtts import gTTS
-import gi
-gi.require_version('Gst', '1.0')
-from gi.repository import Gst, GObject
-
+import tempfile
 
 def detect_cash(target_amount):
-    Gst.init(None)
-    def text_to_speech(text, output_file):
-        tts = gTTS(text=text, lang='en')
-        tts.save(output_file)
-
-    def play_mp3_gstreamer(filename):
-        def on_message(bus, message):
-            t = message.type
-            if t == Gst.MessageType.EOS:
-                pipeline.set_state(Gst.State.NULL)
-                loop.quit()
-            elif t == Gst.MessageType.ERROR:
-                err, debug = message.parse_error()
-                print("Error: %s" % err, debug)
-                pipeline.set_state(Gst.State.NULL)
-                loop.quit()
-            return True
-
-        pipeline = Gst.parse_launch(f'filesrc location={filename} ! decodebin ! audioconvert ! alsasink')
-
-        bus = pipeline.get_bus()
-        bus.add_signal_watch()
-        bus.connect("message", on_message)
-
-        pipeline.set_state(Gst.State.PLAYING)
-
-        loop = GObject.MainLoop()
-        loop.run()
 
     def is_inside(pos, rect):
         x, y, w, h = rect
@@ -149,6 +118,16 @@ def detect_cash(target_amount):
                         total_amount += cash_values[i]
                         print("Total amount: ${:.2f}".format(total_amount))
                         detected_objects.append({"box": current_box, "ttl": frames_to_live})
+                        bill_or_coin = classes[class_id].replace("_", " ")
+                        if bill_or_coin.startswith("dollar"):
+                            spoken_bill_or_coin = f"{cash_values[i]} dollar bill"
+                        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as f:
+                            temp_filename = f.name
+                        tts = gTTS(text=f"{spoken_bill_or_coin} detected.", lang='en')
+                        tts.save(temp_filename)
+                        os.system(f"mpg321 {temp_filename}")
+                        # Remove the temporary speech file
+                        os.remove(temp_filename)
                 detected_objects = [{"box": obj["box"], "ttl": obj["ttl"] - 1} for obj in detected_objects if obj["ttl"] > 0]
 
 
@@ -161,13 +140,6 @@ def detect_cash(target_amount):
             # Check if target amount has been reached
             if total_amount >= target_amount:
                 target_reached = True
-
-                # Generate and play the speech
-                speech = f"{len(indices)} cash objects detected. Total amount: {total_amount} dollars."
-                speech_file = "temp_speech.mp3"
-                text_to_speech(speech, speech_file)
-                play_mp3_gstreamer(speech_file)
-                os.remove(speech_file)
 
                 # Display message when target amount is reached
                 cv2.putText(frame, "Target amount reached!", (10, 110), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
