@@ -51,8 +51,7 @@ def detect_cash(target_amount):
     target_reached = False
     detect_button_rect = (50, 430, 150, 50)
     quit_button_rect = (220, 430, 150, 50)
-    vlc_instance = vlc.Instance()
-
+    
 
     while True:
         # Check for keypress
