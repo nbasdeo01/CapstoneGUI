@@ -1,38 +1,24 @@
 from gtts import gTTS
-import gi
-gi.require_version('Gst', '1.0')
-from gi.repository import Gst, GObject
+from pydub import AudioSegment
+import simpleaudio as sa
 
-def text_to_speech(text, output_file):
-    tts = gTTS(text=text, lang='en')
-    tts.save(output_file)
+def play_mp3_simpleaudio(filename):
+    # Convert MP3 to WAV
+    mp3_audio = AudioSegment.from_mp3(filename)
+    wav_audio = mp3_audio.export("temp_speech.wav", format="wav")
+    wav_audio.close()
 
-def play_mp3_gstreamer(filename):
-    Gst.init(None)
+    # Play WAV file using simpleaudio
+    wave_obj = sa.WaveObject.from_wave_file("temp_speech.wav")
+    play_obj = wave_obj.play()
+    play_obj.wait_done()
 
-    def on_message(bus, message):
-        t = message.type
-        if t == Gst.MessageType.EOS:
-            pipeline.set_state(Gst.State.NULL)
-            loop.quit()
-        elif t == Gst.MessageType.ERROR:
-            err, debug = message.parse_error()
-            print("Error: %s" % err, debug)
-            pipeline.set_state(Gst.State.NULL)
-            loop.quit()
-        return True
+    # Remove temporary WAV file
+    os.remove("temp_speech.wav")
+def create_sample_mp3():
+    sample_text = "This is a test of the simpleaudio library."
+    tts = gTTS(text=sample_text, lang='en')
+    tts.save("sample.mp3")
 
-    pipeline = Gst.parse_launch(f'filesrc location={filename} ! decodebin ! audioconvert ! alsasink')
-    bus = pipeline.get_bus()
-    bus.add_signal_watch()
-    bus.connect("message", on_message)
-
-    pipeline.set_state(Gst.State.PLAYING)
-    loop = GObject.MainLoop()
-    loop.run()
-
-# Test the text-to-speech functionality
-speech = "Hello, this is a test."
-speech_file = "temp_speech.mp3"
-text_to_speech(speech, speech_file)
-play_mp3_gstreamer(speech_file)
+create_sample_mp3()
+play_mp3_simpleaudio("sample.mp3")
