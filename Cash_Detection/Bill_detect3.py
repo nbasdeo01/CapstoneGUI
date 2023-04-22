@@ -1,11 +1,18 @@
 import cv2
 import numpy as np
-import pygame
 import os
 from gtts import gTTS
-import tempfile
-#sudo apt-get install -y python3-dev libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libsmpeg-dev libportmidi-dev libavformat-dev libswscale-dev libjpeg-dev libfreetype6-dev
+
+
 def detect_cash(target_amount):
+    def text_to_speech(text, output_file):
+        tts = gTTS(text=text, lang='en')
+        tts.save(output_file)
+
+    def play_mp3_gstreamer(file_path):
+        pipeline_str = f"filesrc location={file_path} ! decodebin ! audioconvert ! autoaudiosink"
+        os.system(f"gst-launch-1.0 {pipeline_str}")
+
     def is_inside(pos, rect):
         x, y, w, h = rect
         px, py = pos
@@ -118,30 +125,6 @@ def detect_cash(target_amount):
                         total_amount += cash_values[i]
                         print("Total amount: ${:.2f}".format(total_amount))
                         detected_objects.append({"box": current_box, "ttl": frames_to_live})
-                        pygame.mixer.init()
-
-                        # Speak the detected bill or coin using gTTS
-                        bill_or_coin = classes[class_id].replace("_", " ")
-                        if bill_or_coin.startswith("dollar"):
-                            spoken_bill_or_coin = f"{bill_or_coin.split()[1]} dollar bill"
-                        elif bill_or_coin.startswith("coin"):
-                            coin_denomination = bill_or_coin.split()[1].capitalize()
-                            spoken_bill_or_coin = f"{coin_denomination} coin"
-
-                        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as f:
-                            temp_filename = f.name
-
-                        tts = gTTS(text=f"{spoken_bill_or_coin} detected.", lang='en')
-                        tts.save(temp_filename)
-
-                        # Play the MP3 file using pygame
-                        pygame.mixer.music.load(temp_filename)
-                        pygame.mixer.music.play()
-                        while pygame.mixer.music.get_busy():
-                            pygame.time.Clock().tick(10)
-
-                        # Remove the temporary speech file
-                        os.remove(temp_filename)
                 detected_objects = [{"box": obj["box"], "ttl": obj["ttl"] - 1} for obj in detected_objects if obj["ttl"] > 0]
 
 
@@ -154,6 +137,13 @@ def detect_cash(target_amount):
             # Check if target amount has been reached
             if total_amount >= target_amount:
                 target_reached = True
+
+                # Generate and play the speech
+                speech = f"{len(indices)} cash objects detected. Total amount: {total_amount} dollars."
+                speech_file = "temp_speech.mp3"
+                text_to_speech(speech, speech_file)
+                play_mp3_gstreamer(speech_file)
+                os.remove(speech_file)
 
                 # Display message when target amount is reached
                 cv2.putText(frame, "Target amount reached!", (10, 110), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
