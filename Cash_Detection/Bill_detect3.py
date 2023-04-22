@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-import vlc
+import subprocess
 import os
 from gtts import gTTS
 import tempfile
@@ -132,16 +132,8 @@ def detect_cash(target_amount):
                         tts = gTTS(text=f"{spoken_bill_or_coin} detected.", lang='en')
                         tts.save(temp_filename)
 
-                        # Play the MP3 file using vlc
-                        player = vlc_instance.media_player_new()
-                        media = vlc_instance.media_new(temp_filename)
-                        player.set_media(media)
-                        player.play()
-
-                        # Wait for the sound to finish playing
-                        end = time.time() + 5
-                        while time.time() < end:
-                            continue
+                        # Play the MP3 file using mpg123
+                        subprocess.Popen(["mpg123", "-q", temp_filename]).wait()
 
                         # Remove the temporary speech file
                         os.remove(temp_filename)
