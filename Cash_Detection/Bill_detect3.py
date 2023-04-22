@@ -1,10 +1,10 @@
 import cv2
 import numpy as np
-import subprocess
+import pygame
 import os
 from gtts import gTTS
 import tempfile
-
+#sudo apt-get install -y python3-dev libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libsmpeg-dev libportmidi-dev libavformat-dev libswscale-dev libjpeg-dev libfreetype6-dev
 def detect_cash(target_amount):
     def is_inside(pos, rect):
         x, y, w, h = rect
@@ -118,6 +118,9 @@ def detect_cash(target_amount):
                         total_amount += cash_values[i]
                         print("Total amount: ${:.2f}".format(total_amount))
                         detected_objects.append({"box": current_box, "ttl": frames_to_live})
+                        pygame.mixer.init()
+
+                        # Speak the detected bill or coin using gTTS
                         bill_or_coin = classes[class_id].replace("_", " ")
                         if bill_or_coin.startswith("dollar"):
                             spoken_bill_or_coin = f"{bill_or_coin.split()[1]} dollar bill"
@@ -131,8 +134,11 @@ def detect_cash(target_amount):
                         tts = gTTS(text=f"{spoken_bill_or_coin} detected.", lang='en')
                         tts.save(temp_filename)
 
-                        # Play the MP3 file using mpg123
-                        subprocess.Popen(["mpg123", "-q", temp_filename]).wait()
+                        # Play the MP3 file using pygame
+                        pygame.mixer.music.load(temp_filename)
+                        pygame.mixer.music.play()
+                        while pygame.mixer.music.get_busy():
+                            pygame.time.Clock().tick(10)
 
                         # Remove the temporary speech file
                         os.remove(temp_filename)
