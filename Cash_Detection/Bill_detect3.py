@@ -1,5 +1,9 @@
 import cv2
 import numpy as np
+import vlc
+import os
+from gtts import gTTS
+import tempfile
 
 def detect_cash(target_amount):
     def is_inside(pos, rect):
@@ -47,6 +51,8 @@ def detect_cash(target_amount):
     target_reached = False
     detect_button_rect = (50, 430, 150, 50)
     quit_button_rect = (220, 430, 150, 50)
+    vlc_instance = vlc.Instance()
+
 
     while True:
         # Check for keypress
@@ -113,6 +119,32 @@ def detect_cash(target_amount):
                         total_amount += cash_values[i]
                         print("Total amount: ${:.2f}".format(total_amount))
                         detected_objects.append({"box": current_box, "ttl": frames_to_live})
+                        bill_or_coin = classes[class_id].replace("_", " ")
+                        if bill_or_coin.startswith("dollar"):
+                            spoken_bill_or_coin = f"{bill_or_coin.split()[1]} dollar bill"
+                        elif bill_or_coin.startswith("coin"):
+                            coin_denomination = bill_or_coin.split()[1].capitalize()
+                            spoken_bill_or_coin = f"{coin_denomination} coin"
+
+                        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as f:
+                            temp_filename = f.name
+
+                        tts = gTTS(text=f"{spoken_bill_or_coin} detected.", lang='en')
+                        tts.save(temp_filename)
+
+                        # Play the MP3 file using vlc
+                        player = vlc_instance.media_player_new()
+                        media = vlc_instance.media_new(temp_filename)
+                        player.set_media(media)
+                        player.play()
+
+                        # Wait for the sound to finish playing
+                        end = time.time() + 5
+                        while time.time() < end:
+                            continue
+
+                        # Remove the temporary speech file
+                        os.remove(temp_filename)
                 detected_objects = [{"box": obj["box"], "ttl": obj["ttl"] - 1} for obj in detected_objects if obj["ttl"] > 0]
 
 
