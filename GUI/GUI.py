@@ -126,26 +126,26 @@ class CashRegisterApp(tk.Tk):
         input_frame.grid(row=5, column=0, columnspan=2, pady=10)
 
         self.add_item_label = tk.Label(input_frame, text="Enter Item Name: ", font=("Open Sans", 16))
-        self.add_item_label.grid(row=0, column=0, pady=1, padx=5)
+        self.add_item_label.grid(row=0, column=0, pady=3, padx=5)
 
         # Item name entry
         self.item_name_entry = ttk.Entry(input_frame)
-        self.item_name_entry.grid(row=0, column=1, pady=1, padx=5)
+        self.item_name_entry.grid(row=0, column=1, pady=3, padx=5)
 
         # Item price entry
         self.item_price_entry = ttk.Entry(input_frame)
-        self.item_price_entry.grid(row=1, column=1, pady=1, padx=5)
+        self.item_price_entry.grid(row=1, column=1, pady=3, padx=5)
         self.item_price_label = tk.Label(input_frame, text="Price", font=("Open Sans", 16))
-        self.item_price_label.grid(row=1, column=0, pady=1, padx=5)
+        self.item_price_label.grid(row=1, column=0, pady=3, padx=5)
 
         # Item image path entry
         self.item_image_entry = ttk.Entry(input_frame)
-        self.item_image_entry.grid(row=2, column=1, pady=1, padx=5)
+        self.item_image_entry.grid(row=2, column=1, pady=3, padx=5)
 
         self.new_item_quantity_entry = tk.Entry(input_frame)
-        self.new_item_quantity_entry.grid(row=3, column=1, pady=1, padx=5)
+        self.new_item_quantity_entry.grid(row=3, column=1, pady=3, padx=5)
         self.new_item_quantity_label = tk.Label(input_frame, text="Quantity", font=("Open Sans", 16))
-        self.new_item_quantity_label.grid(row=3, column=0, pady=1, padx=5)
+        self.new_item_quantity_label.grid(row=3, column=0, pady=3, padx=5)
 
         # Add item button
         self.add_item_button = tk.Button(self.cash_register_page, text="Add Item", font=("Open Sans", 16), command=lambda: self.add_item_to_db(self.item_name_entry.get(), self.item_price_entry.get(), self.item_image_entry.get(), self.new_item_quantity_entry.get()))
