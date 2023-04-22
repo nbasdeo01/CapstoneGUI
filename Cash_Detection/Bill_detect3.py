@@ -2,16 +2,40 @@ import cv2
 import numpy as np
 import os
 from gtts import gTTS
+import gi
+gi.require_version('Gst', '1.0')
+from gi.repository import Gst, GObject
 
 
 def detect_cash(target_amount):
+    Gst.init(None)
     def text_to_speech(text, output_file):
         tts = gTTS(text=text, lang='en')
         tts.save(output_file)
 
-    def play_mp3_gstreamer(file_path):
-        pipeline_str = f"filesrc location={file_path} ! decodebin ! audioconvert ! autoaudiosink"
-        os.system(f"gst-launch-1.0 {pipeline_str}")
+    def play_mp3_gstreamer(filename):
+        def on_message(bus, message):
+            t = message.type
+            if t == Gst.MessageType.EOS:
+                pipeline.set_state(Gst.State.NULL)
+                loop.quit()
+            elif t == Gst.MessageType.ERROR:
+                err, debug = message.parse_error()
+                print("Error: %s" % err, debug)
+                pipeline.set_state(Gst.State.NULL)
+                loop.quit()
+            return True
+
+        pipeline = Gst.parse_launch(f'filesrc location={filename} ! decodebin ! audioconvert ! alsasink')
+
+        bus = pipeline.get_bus()
+        bus.add_signal_watch()
+        bus.connect("message", on_message)
+
+        pipeline.set_state(Gst.State.PLAYING)
+
+        loop = GObject.MainLoop()
+        loop.run()
 
     def is_inside(pos, rect):
         x, y, w, h = rect
