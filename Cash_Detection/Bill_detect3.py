@@ -117,7 +117,7 @@ def detect_cash(target_amount):
                         total_amount += cash_values[i]
                         print("Total amount: ${:.2f}".format(total_amount))
                         detected_objects.append({"box": current_box, "ttl": frames_to_live})
-                        spoken_bill = "{} dollars detected.".format(cash_values[i])
+                        spoken_bill= f"{cash_values[i]} dollars detected."
                         tts = gTTS(spoken_bill, lang='en')
                         tts.save("bill.mp3")
                         playsound("bill.mp3")
