@@ -78,7 +78,7 @@ def calculate_change(current_amount, target_amount):
     tts_text = "Give back: "
     for key, value in change_dict.items():
         print("{} x {}".format(value, key))
-        tts_text += "{} {}, ".format(value, key)
+        tts_text += "{} times {}, ".format(value, key)
         tts = gTTS(tts_text, lang='en')
         tts.save("change.mp3")
         playsound("change.mp3")
