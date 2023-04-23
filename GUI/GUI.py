@@ -2,6 +2,7 @@ import tkinter as tk
 import sqlite3
 import subprocess
 import datetime
+import tempfile
 import pytz
 import cv2
 import os
@@ -34,6 +35,7 @@ class CashRegisterApp(tk.Tk):
         self.load_password()
         self.create_cart()
         self.create_remove_button()
+        self.item_quantities = {}
         self.cash_register_page.grid_remove()
         self.admin_page.grid_remove()
         # Center the application on the screen
@@ -92,38 +94,45 @@ class CashRegisterApp(tk.Tk):
         # self.total_display = tk.Label(self.cash_register_page, textvariable=self.total_var, font=("Open Sans", 16), width=10, bg="#FFFFFF", relief="groove", borderwidth=2)
         # self.total_display.grid(row=3, column=1, padx=20, pady=20)
 
-        # Pay button
-        self.pay_button = tk.Button(self.cash_register_page, text="Pay", font=("Open Sans", 16), command=self.process_payment, bg="#2196F3", fg="#FFFFFF", relief="groove", borderwidth=2)
-        self.pay_button.grid(row=4, column=0, padx=20, pady=20, ipadx=30, ipady=10)
-
-        # Clear button
-        self.clear_button = tk.Button(self.cash_register_page, text="Clear", font=("Open Sans", 16), command=self.clear_items, bg="#FF5722", fg="#FFFFFF", relief="groove", borderwidth=2)
-        self.clear_button.grid(row=4, column=1, padx=20, pady=20, ipadx=20, ipady=10)
-
-        # Logout button
-        self.logout_button = tk.Button(self.cash_register_page, text="Logout", font=("Open Sans", 16), command=self.logout, bg="red", fg = "white")
-        self.logout_button.grid(row=4, column=2, padx=20, pady=20, ipadx=20, ipady=10)
+        parent_bg_color = self.cash_register_page.cget("bg")
 
         # Read Cart button
-        self.read_cart_button = tk.Button(self.cash_register_page, text="Read Cart", font=("Open Sans", 16), command=self.read_cart_description, bg="#4CAF50", fg="#FFFFFF", relief="groove", borderwidth=2)
-        self.read_cart_button.grid(row=3, column=0, padx=20, pady=20, ipadx=20, ipady=10)
-    
-        # Access Add Passcode Page button
-        self.add_user_button = tk.Button(self.cash_register_page, text="Add User", font=("Open Sans", 16), command=self.show_add_passcode_page, bg="#4CAF50", fg="#FFFFFF", relief="groove", borderwidth=2)
-        self.add_user_button.grid(row=3, column=1, padx=20, pady=20, ipadx=20, ipady=10)
+        self.read_cart_button_frame = tk.Frame(self.cash_register_page, bg=parent_bg_color)
+        self.read_cart_button_frame.grid(row=2, column=0, padx=20, pady=20, sticky="w")
+        self.read_cart_button = tk.Button(self.read_cart_button_frame, text="Read Cart", font=("Open Sans", 16), command=self.read_cart_description, bg="#4CAF50", fg="#FFFFFF", relief="groove", borderwidth=2)
+        self.read_cart_button.pack(side="left", padx=20, ipadx=20, ipady=10)
+
+        # Pay button
+        self.pay_button = tk.Button(self.read_cart_button_frame, text="Pay", font=("Open Sans", 16), command=self.process_payment, bg="#2196F3", fg="#FFFFFF", relief="groove", borderwidth=2)
+        self.pay_button.pack(side="left", padx=20, ipadx=20, ipady=10)
+
+        # Clear button
+        self.clear_button = tk.Button(self.read_cart_button_frame, text="Clear", font=("Open Sans", 16), command=self.clear_items, bg="#2196F3", fg="#FFFFFF", relief="groove", borderwidth=2)
+        self.clear_button.pack(side="left", padx=20, ipadx=20, ipady=10)
+
+        # Logout button
+        self.logout_button = tk.Button(self.read_cart_button_frame, text="Logout", font=("Open Sans", 16), command=self.logout, bg="#2196F3", fg="#FFFFFF", relief="groove", borderwidth=2)
+        self.logout_button.pack(side="left", padx=20, ipadx=20, ipady=10)
+
+        # Frame for Admin buttons
+        self.admin_buttons_frame = tk.Frame(self.cash_register_page, bg=parent_bg_color)
+        self.admin_buttons_frame.grid(row=3, column=0, padx=20, pady=20, sticky="w")
+
+        self.add_user_button = tk.Button(self.admin_buttons_frame, text="Add User", font=("Open Sans", 16), command=self.show_add_passcode_page, bg="#4CAF50", fg="#FFFFFF", relief="groove", borderwidth=2)
+        self.add_user_button.pack(side="left", padx=20, ipadx=20, ipady=10)
 
         # Delete a User
-        self.delete_user_button = tk.Button(self.cash_register_page, text="Delete User", font=("Open Sans", 16), command=self.delete_user_from_db, bg="#4CAF50", fg="#FFFFFF", relief="groove", borderwidth=2)
-        self.delete_user_button.grid(row=6, column=3, padx=20, pady=20, ipadx=20, ipady=10)
+        self.delete_user_button = tk.Button(self.admin_buttons_frame, text="Delete User", font=("Open Sans", 16), command=self.delete_user_from_db, bg="#4CAF50", fg="#FFFFFF", relief="groove", borderwidth=2)
+        self.delete_user_button.pack(side="left", padx=20, ipadx=20, ipady=10)
 
         # Access Transactions Page button
-        self.transactions_button = tk.Button(self.cash_register_page, text="Transactions", font=("Open Sans", 16), command=self.show_transactions, bg="#4CAF50", fg="#FFFFFF", relief="groove", borderwidth=2)
-        self.transactions_button.grid(row=3, column=2, padx=20, pady=10, ipadx=20, ipady=10)
+        self.transactions_button = tk.Button(self.admin_buttons_frame, text="Transactions", font=("Open Sans", 16), command=self.show_transactions, bg="#4CAF50", fg="#FFFFFF", relief="groove", borderwidth=2)
+        self.transactions_button.pack(side="left", padx=20, ipadx=20, ipady=10)
 
         # Place this code within your create_cash_register_page() function
         # Create a frame to contain labels and text fields
-        input_frame = tk.Frame(self.cash_register_page)
-        input_frame.grid(row=5, column=0, columnspan=2, pady=10)
+        input_frame = tk.Frame(self.cash_register_page, bg=parent_bg_color)
+        input_frame.grid(row=4, column=0, pady=10, sticky="w")
 
         self.add_item_label = tk.Label(input_frame, text="Enter Item Name: ", font=("Open Sans", 16))
         self.add_item_label.grid(row=0, column=0, pady=3, padx=5)
@@ -148,12 +157,12 @@ class CashRegisterApp(tk.Tk):
         self.new_item_quantity_label.grid(row=3, column=0, pady=3, padx=5)
 
         # Add item button
-        self.add_item_button = tk.Button(self.cash_register_page, text="Add Item", font=("Open Sans", 16), command=lambda: self.add_item_to_db(self.item_name_entry.get(), self.item_price_entry.get(), self.item_image_entry.get(), self.new_item_quantity_entry.get()))
-        self.add_item_button.grid(row=5, column=2, padx=20, pady=20, ipadx=20, ipady=10)
+        self.add_item_button = tk.Button(input_frame, text="Add Item", font=("Open Sans", 16), command=lambda: self.add_item_to_db(self.item_name_entry.get(), self.item_price_entry.get(), self.item_image_entry.get(), self.new_item_quantity_entry.get()))
+        self.add_item_button.grid(row=1, column=3, padx=5, pady=20, ipadx=20, ipady=10)
 
         # Delete item button
-        self.delete_item_button = tk.Button(self.cash_register_page, text="Delete Item", font=("Open Sans", 16), command=self.delete_item_from_db, bg="#FF5722", fg="#FFFFFF", relief="groove", borderwidth=2)
-        self.delete_item_button.grid(row=5, column=3, padx=20, pady=10, ipadx=20, ipady=10)
+        self.delete_item_button = tk.Button(input_frame, text="Delete Item", font=("Open Sans", 16), command=self.delete_item_from_db, bg="#4CAF50", fg="#FFFFFF", relief="groove", borderwidth=2)
+        self.delete_item_button.grid(row=1, column=4, padx=5, pady=20, ipadx=20, ipady=10)
 
         # Initialize total
         self.total = 0.0
@@ -164,7 +173,6 @@ class CashRegisterApp(tk.Tk):
         self.items_page = tk.Toplevel(self)
         self.items_page.title("Items Page")
         self.items_page.configure(bg="#F5F5F5")
-
         # Add a "Back" button
         back_button = tk.Button(self.items_page, text="Back", font=("Open Sans", 16), command=self.items_page.destroy, bg="red", fg="white")
         back_button.grid(row=0, column=0, padx=20, pady=20, ipadx=20, ipady=10)
@@ -178,19 +186,22 @@ class CashRegisterApp(tk.Tk):
         # Load items from the database
         conn = sqlite3.connect("cash_register.db")
         cursor = conn.cursor()
-        cursor.execute("SELECT name, price FROM items")
+        cursor.execute("SELECT name, price, image_path FROM items_ordered")
         items = cursor.fetchall()
         conn.close()
-
         # Create a button for each item with the add_item_to_cart command
-        for i, (item_name, item_price) in enumerate(items):
+        for i, (item_name, item_price, image_path) in enumerate(items):
+            item_image = ImageTk.PhotoImage(Image.open(image_path).resize((150, 150)))
             button = tk.Button(
                 self.items_page,
                 text=f"{item_name}\n${item_price:.2f}",
                 font=("Open Sans", 20),
                 command=lambda price=item_price, name=item_name: self.add_item_price(price, name),
+                image=item_image,
+                compound="top",
                 width=200, height=200,
             )
+            button.image = item_image
             button.grid(row=(i // 3) + 1, column=i % 3, padx=10, pady=10)
 
     def capture_image(self, save_directory="GUI/item_images"):
@@ -350,26 +361,45 @@ class CashRegisterApp(tk.Tk):
     def update_items(self):
         conn = sqlite3.connect("cash_register.db")
         cursor = conn.cursor()
-        cursor.execute("SELECT name, price, image_path FROM items")
+        cursor.execute("SELECT name, price, image_path FROM items_ordered")
         self.items = []
         for name, price, image_path in cursor.fetchall():
             try:
                 item_image = ImageTk.PhotoImage(Image.open(image_path).resize((150, 150)))
             except Exception as e:
                 messagebox.showerror("Error", f"Cannot open image for item {name}: {e}")
-                continue  # Skip this item and move to the next one
+                continue
             self.items.append((name, price, item_image))
         conn.close()
 
         # Clear the current buttons
         for button in self.item_buttons:
             button.destroy()
+        
+        parent_bg_color = self.cash_register_page.cget("bg")
+
+        # Create a frame for the buttons
+        self.buttons_frame = tk.Frame(self.cash_register_page, bg=parent_bg_color)
+        self.buttons_frame.grid(row=0, column=0)
+
+        # Create a canvas inside the frame
+        self.buttons_canvas = tk.Canvas(self.buttons_frame, height=230, width=675)
+        self.buttons_canvas.grid(row=0, column=0)
+
+        # Create a scrollbar for the canvas
+        self.scrollbar = ttk.Scrollbar(self.buttons_frame, orient="vertical", command=self.buttons_canvas.yview)
+        self.scrollbar.grid(row=0, column=1, sticky="ns")
+        self.buttons_canvas.configure(yscrollcommand=self.scrollbar.set)
+
+        # Create an inner frame to place the buttons on the canvas
+        self.inner_frame = tk.Frame(self.buttons_canvas)
+        self.buttons_canvas.create_window((0, 0), window=self.inner_frame, anchor="nw")
 
         # Create buttons for each item
         self.item_buttons = []
         for i, (item_name, item_price, item_image) in enumerate(self.items):
             button = tk.Button(
-                self.cash_register_page,
+                self.inner_frame,
                 text=f"{item_name}\n${item_price:.2f}",
                 font=("Open Sans", 20),
                 command=lambda price=item_price, name=item_name: self.add_item_price(price, name),
@@ -380,6 +410,10 @@ class CashRegisterApp(tk.Tk):
             button.image = item_image
             button.grid(row=i // 3, column=i % 3, padx=10, pady=10)
             self.item_buttons.append(button)
+
+        # Update the canvas scroll region after creating the buttons
+        self.inner_frame.update_idletasks()
+        self.buttons_canvas.configure(scrollregion=self.buttons_canvas.bbox("all"))
 
     def insert_transaction(self, transaction_data, total):
         conn = sqlite3.connect("cash_register.db")
@@ -428,7 +462,13 @@ class CashRegisterApp(tk.Tk):
 
     def create_cart(self):
         self.cart = tk.Listbox(self.cash_register_page, font=("Open Sans", 20), height=10, width=15)
-        self.cart.grid(row=0, column=3, rowspan=3, padx=20, pady=20)
+        self.cart.grid(row=0, column=3, rowspan=2, padx=20, pady=10, sticky="n")
+
+    def create_remove_button(self):
+        remove_label = tk.Label(self.cash_register_page, text="Tap an item in the cart\nto remove it", font=("Open Sans", 16), bg="#F5F5F5", fg="#333333")
+        remove_label.grid(row=2, column=3, padx=20, pady=0, sticky="n")
+        self.remove_button = tk.Button(self.cash_register_page, text="Remove Item", font=("Open Sans", 16), command=self.remove_item, bg="#FF5722", fg="#FFFFFF", relief="groove", borderwidth=2)
+        self.remove_button.grid(row=3, column=3, padx=20, pady=(0, 10), ipadx=20, ipady=10, sticky="n")
 
     def read_cart_description(self):
         cart_items = self.cart.get(0, 'end')
@@ -436,27 +476,44 @@ class CashRegisterApp(tk.Tk):
             speech = "The cart is currently empty."
         else:
             speech = "The cart contains: "
+            unique_items = set()
             for item in cart_items:
-                speech += f"{item}, "
+                item_name = item.split(" (")[0]  # Extract the item name from the item string
+                unique_items.add(item_name)
+        
+            for unique_item in unique_items:
+                speech += f"{unique_item}. Quantity {self.item_quantities[unique_item]}. "
+        
             speech = speech[:-2] + ". "  # Remove the last comma and space, add a period
+            # Round the total to 2 decimal places to avoid floating-point arithmetic issues
+            rounded_total = round(self.total, 2)
             # Format the total as dollars and cents
-            total_dollars, total_cents = divmod(int(self.total * 100), 100)
+            total_dollars, total_cents = divmod(int(rounded_total * 100), 100)
             speech += f"The cart total is: {total_dollars} dollars and {total_cents} cents, "
         tts = gTTS(speech, lang='en')
         tts.save("cart_description.mp3")
         playsound("cart_description.mp3")
         os.remove("cart_description.mp3")
 
-    def create_remove_button(self):
-        remove_label = tk.Label(self.cash_register_page, text="Tap an item in the cart\nto remove it", font=("Open Sans", 16), bg="#F5F5F5", fg="#333333")
-        remove_label.grid(row=3, column=3, padx=20, pady=10)
-        self.remove_button = tk.Button(self.cash_register_page, text="Remove Item", font=("Open Sans", 16), command=self.remove_item, bg="#FF5722", fg="#FFFFFF", relief="groove", borderwidth=2)
-        self.remove_button.grid(row=4, column=3, padx=20, pady=10, ipadx=20, ipady=10)
-
     def add_item_price(self, price, item_name):
         self.total += price
         self.total_var.set(f"${self.total:.2f}")
+
+        # Update the item quantity in the cart
+        if item_name not in self.item_quantities:
+            self.item_quantities[item_name] = 0
+        self.item_quantities[item_name] += 1
+
         self.cart.insert(tk.END, f"{item_name} (${price:.2f})")
+
+        # Generate spoken text using gTTS
+        tts_text = f"{item_name}. Quantity {self.item_quantities[item_name]}."
+        tts = gTTS(tts_text, lang="en")
+
+        # Save the audio file temporarily and play it
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_file:
+            tts.save(temp_file.name)
+            playsound(temp_file.name)
 
     def remove_item(self):
         try:
@@ -526,6 +583,7 @@ class CashRegisterApp(tk.Tk):
         cursor.execute("INSERT OR IGNORE INTO passwords (name, password) VALUES (?, ?)", ("User ID 2", self.correct_passcode2))
         cursor.execute("CREATE TABLE IF NOT EXISTS transactions (id INTEGER PRIMARY KEY AUTOINCREMENT, transaction_data TEXT, total REAL, timestamp DATETIME DEFAULT (datetime('now', 'localtime')))")
         cursor.execute("CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE, price REAL NOT NULL, image_path TEXT NOT NULL, quantity INTEGER NOT NULL)")
+        cursor.execute("CREATE VIEW IF NOT EXISTS items_ordered AS SELECT * FROM items ORDER BY name")
         conn.commit()
         conn.close()
 
@@ -595,6 +653,7 @@ class CashRegisterApp(tk.Tk):
             self.cart.delete(0, tk.END)
             self.total = 0.0
             self.total_var.set(f"${self.total:.2f}")
+            self.item_quantities = {}  # Clear the item quantities dictionary
 
     def toggle_add_item_button(self, show=True):
         if show:
@@ -636,17 +695,17 @@ class CashRegisterApp(tk.Tk):
                 self.admin = False
 
             if self.admin:
-                self.add_user_button.grid()  # Show the "Add User" button for the admin user
-                self.delete_user_button.grid()  # Show the "Delete User" button for the admin user
-                self.transactions_button.grid()  # Show the "Transactions" button for the admin user
-                self.delete_item_button.grid()  # Show the "Delete Item" button for the admin user
-                self.toggle_add_item_button()  # Show the "Add Item" button for the admin user
+                self.add_user_button.pack(side="left", padx=20, ipadx=20, ipady=10)
+                self.delete_user_button.pack(side="left", padx=20, ipadx=20, ipady=10)
+                self.transactions_button.pack(side="left", padx=20, ipadx=20, ipady=10)
+                self.delete_item_button.grid()
+                self.toggle_add_item_button()
             else:
-                self.add_user_button.grid_remove()  # Hide the "Add User" button for other users
-                self.delete_user_button.grid_remove()  # Hide the "Delete User" button for other users
-                self.transactions_button.grid_remove()  # Hide the "Transactions" button for other users
-                self.delete_item_button.grid_remove()  # Hide the "Delete Item" button for other users
-                self.toggle_add_item_button(False)  # Hide the "Add Item" button for other users
+                self.add_user_button.pack_forget()
+                self.delete_user_button.pack_forget()
+                self.transactions_button.pack_forget()
+                self.delete_item_button.grid_remove()
+                self.toggle_add_item_button(False)
 
             return True
         else:
