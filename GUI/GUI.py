@@ -208,8 +208,8 @@ class CashRegisterApp(tk.Tk):
         cv2.namedWindow("Take picture of item")
         cv2.setMouseCallback("Take picture of item", on_mouse_click)
 
-        take_pic_rect = (10, 400, 150, 50)
-        quit_button_rect = (170, 400, 150, 50)
+        take_pic_rect = (245, 360, 150, 50)
+        quit_button_rect = (245, 420, 150, 50)
         # Create the save directory if it doesn't exist
         if not os.path.exists(save_directory):
             os.makedirs(save_directory)
@@ -227,18 +227,19 @@ class CashRegisterApp(tk.Tk):
             ret, frame = cap.read()
 
             # Display the resulting frame
-            cv2.rectangle(frame, (take_pic_rect[0], take_pic_rect[1]), (take_pic_rect[0] + take_pic_rect[2], take_pic_rect[1] + take_pic_rect[3]), (0, 255, 0), 2)
+            cv2.rectangle(frame, (take_pic_rect[0], take_pic_rect[1]), (take_pic_rect[0] + take_pic_rect[2], take_pic_rect[1] + take_pic_rect[3]), (0, 255, 0), -1)
             text_detect = "Take picture"
             (text_width, text_height), _ = cv2.getTextSize(text_detect, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
             text_x = take_pic_rect[0] + (take_pic_rect[2] - text_width) // 2
             text_y = take_pic_rect[1] + (take_pic_rect[3] + text_height) // 2
-            cv2.putText(frame, text_detect, (text_x, text_y), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+            cv2.putText(frame, text_detect, (text_x, text_y), cv2.FONT_HERSHEY_DUPLEX, 0.6, (0, 0, 0), 2)
 
-            cv2.rectangle(frame, (quit_button_rect[0], quit_button_rect[1]), (quit_button_rect[0] + quit_button_rect[2], quit_button_rect[1] + quit_button_rect[3]), (255, 0, 0), 2)
+            cv2.rectangle(frame, (quit_button_rect[0], quit_button_rect[1]), (quit_button_rect[0] + quit_button_rect[2], quit_button_rect[1] + quit_button_rect[3]), (0, 0, 255), -1)
             text_quit = "Exit"
-            (text_width, text_height), _ = cv2.getTextSize(text_quit, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
+            (text_width, text_height), _ = cv2.getTextSize(text_quit, cv2.FONT_HERSHEY_DUPLEX, 0.6, 2)
             text_x = quit_button_rect[0] + (quit_button_rect[2] - text_width) // 2
             text_y = quit_button_rect[1] + (quit_button_rect[3] + text_height) // 2
+            cv2.putText(frame, text_quit, (text_x, text_y), cv2.FONT_HERSHEY_DUPLEX, 0.6, (0, 0, 0), 2)
             cv2.imshow("Take picture of item", frame)
 
             key = cv2.waitKey(1) & 0xFF

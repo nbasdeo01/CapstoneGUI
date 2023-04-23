@@ -27,8 +27,15 @@ def update_total_price(total_amount, target_amount):
     cv2.namedWindow("Coins")
     cv2.setMouseCallback("Coins", on_mouse_click)
 
-    detect_button_rect = (10, 400, 150, 50)
-    quit_button_rect = (170, 400, 150, 50)   
+    button_width = 150
+    button_height = 50
+    button_spacing = 20
+    screen_width = 640
+    screen_height = 480
+    buttons_y = screen_height - button_height - 20
+
+    detect_button_rect = ((screen_width - button_width * 2 - button_spacing) // 2, buttons_y, button_width, button_height)
+    quit_button_rect = (detect_button_rect[0] + button_width + button_spacing, buttons_y, button_width, button_height) 
 
     params = cv2.SimpleBlobDetector_Params()
     params.minThreshold = 10
@@ -82,19 +89,19 @@ def update_total_price(total_amount, target_amount):
         cv2.putText(frame, 'Current amount: ${:.2f}'.format(total_amount), (10, 30),
 
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
-        cv2.rectangle(frame, (detect_button_rect[0], detect_button_rect[1]), (detect_button_rect[0] + detect_button_rect[2], detect_button_rect[1] + detect_button_rect[3]), (0, 255, 0), 2)
+        cv2.rectangle(frame, (detect_button_rect[0], detect_button_rect[1]), (detect_button_rect[0] + detect_button_rect[2], detect_button_rect[1] + detect_button_rect[3]), (0, 255, 0), -1)        
         text_detect = "Detect"
         (text_width, text_height), _ = cv2.getTextSize(text_detect, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
         text_x = detect_button_rect[0] + (detect_button_rect[2] - text_width) // 2
         text_y = detect_button_rect[1] + (detect_button_rect[3] + text_height) // 2
-        cv2.putText(frame, text_detect, (text_x, text_y), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+        cv2.putText(frame, text_detect, (text_x, text_y), cv2.FONT_HERSHEY_DUPLEX, 0.6, (0, 0, 0), 2)
 
-        cv2.rectangle(frame, (quit_button_rect[0], quit_button_rect[1]), (quit_button_rect[0] + quit_button_rect[2], quit_button_rect[1] + quit_button_rect[3]), (255, 0, 0), 2)
+        cv2.rectangle(frame, (quit_button_rect[0], quit_button_rect[1]), (quit_button_rect[0] + quit_button_rect[2], quit_button_rect[1] + quit_button_rect[3]), (0, 0, 255), -1)
         text_quit = "Quit"
-        (text_width, text_height), _ = cv2.getTextSize(text_quit, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
+        (text_width, text_height), _ = cv2.getTextSize(text_quit, cv2.FONT_HERSHEY_DUPLEX, 0.6, 2)
         text_x = quit_button_rect[0] + (quit_button_rect[2] - text_width) // 2
         text_y = quit_button_rect[1] + (quit_button_rect[3] + text_height) // 2
-        cv2.putText(frame, text_quit, (text_x, text_y), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
+        cv2.putText(frame, text_quit, (text_x, text_y), cv2.FONT_HERSHEY_DUPLEX, 0.6, (0, 0, 0), 2)
         cv2.imshow('Coins', frame)
         key = cv2.waitKey(1) & 0xFF
 
