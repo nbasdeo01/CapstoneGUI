@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import os
 from gtts import gTTS
-import tempfile
+from playsound import playsound
 
 def detect_cash(target_amount):
 
@@ -105,7 +105,6 @@ def detect_cash(target_amount):
                 for i in np.array(indices).flatten():
                     current_box = cash_objects[i]
                     matched_prev_box = False
-                    class_id = classes.index(classes[class_id])
 
                     # Compare current_box to each box in prev_cash_objects using the Intersection over Union (IoU) metric
                     for detected_obj in detected_objects:
@@ -118,16 +117,12 @@ def detect_cash(target_amount):
                         total_amount += cash_values[i]
                         print("Total amount: ${:.2f}".format(total_amount))
                         detected_objects.append({"box": current_box, "ttl": frames_to_live})
-                        bill_or_coin = classes[class_id].replace("_", " ")
-                        if bill_or_coin.startswith("dollar"):
-                            spoken_bill_or_coin = f"{cash_values[i]} dollar bill"
-                        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as f:
-                            temp_filename = f.name
+                        spoken_bill_or_coin = f"{cash_values[i]} dollars"
                         tts = gTTS(text=f"{spoken_bill_or_coin} detected.", lang='en')
-                        tts.save(temp_filename)
-                        os.system(f"mpg321 {temp_filename}")
+                        tts.save("bill.mp3")
+                        playsound("bill.mp3")
                         # Remove the temporary speech file
-                        os.remove(temp_filename)
+                        os.remove("bill.mp3")
                 detected_objects = [{"box": obj["box"], "ttl": obj["ttl"] - 1} for obj in detected_objects if obj["ttl"] > 0]
 
 
