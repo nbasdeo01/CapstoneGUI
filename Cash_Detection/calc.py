@@ -2,6 +2,9 @@ from PIL import Image
 import cv2
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
+from gtts import gTTS
+from playsound import playsound
+import os
 
 def display_images(change_dict, bill_and_coin_images):
     # Set the size of the final image and create a white background
@@ -72,10 +75,14 @@ def calculate_change(current_amount, target_amount):
             change -= count * value
 
     print("Best combination of coins and bills to give back:")
+    tts_text = "Give back: "
     for key, value in change_dict.items():
         print("{} x {}".format(value, key))
-
-
+        tts_text += "{} {}, ".format(value, key)
+        tts = gTTS(tts_text, lang='en')
+        tts.save("change.mp3")
+        playsound("change.mp3")
+        os.remove("change.mp3")
     return change_dict
 
 def main():
