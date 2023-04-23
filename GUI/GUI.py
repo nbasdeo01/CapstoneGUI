@@ -222,6 +222,22 @@ class CashRegisterApp(tk.Tk):
             button.grid(row=(i // 3) + 1, column=i % 3, padx=10, pady=10)
 
     def capture_image(self, save_directory="GUI/item_images"):
+        def is_inside(pos, rect):
+            x, y, w, h = rect
+            px, py = pos
+            return x < px < x + w and y < py < y + h
+        detect_quit_flags = [False, False]
+        def on_mouse_click(event, x, y, flags, param):
+            if event == cv2.EVENT_LBUTTONDOWN:
+                if is_inside((x, y), take_pic_rect):
+                    detect_quit_flags[0] = True
+                elif is_inside((x, y), quit_button_rect):
+                    detect_quit_flags[1] = True
+        cv2.namedWindow("Take picture of item")
+        cv2.setMouseCallback("Take picture of item", on_mouse_click)
+
+        take_pic_rect = (10, 400, 150, 50)
+        quit_button_rect = (170, 400, 150, 50)
         # Create the save directory if it doesn't exist
         if not os.path.exists(save_directory):
             os.makedirs(save_directory)
@@ -239,19 +255,31 @@ class CashRegisterApp(tk.Tk):
             ret, frame = cap.read()
 
             # Display the resulting frame
-            cv2.imshow("Press spacebar to take a photo, 'q' to exit", frame)
+            cv2.rectangle(frame, (take_pic_rect[0], take_pic_rect[1]), (take_pic_rect[0] + take_pic_rect[2], take_pic_rect[1] + take_pic_rect[3]), (0, 255, 0), 2)
+            text_detect = "Take picture"
+            (text_width, text_height), _ = cv2.getTextSize(text_detect, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
+            text_x = take_pic_rect[0] + (take_pic_rect[2] - text_width) // 2
+            text_y = take_pic_rect[1] + (take_pic_rect[3] + text_height) // 2
+            cv2.putText(frame, text_detect, (text_x, text_y), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+
+            cv2.rectangle(frame, (quit_button_rect[0], quit_button_rect[1]), (quit_button_rect[0] + quit_button_rect[2], quit_button_rect[1] + quit_button_rect[3]), (255, 0, 0), 2)
+            text_quit = "Exit"
+            (text_width, text_height), _ = cv2.getTextSize(text_quit, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
+            text_x = quit_button_rect[0] + (quit_button_rect[2] - text_width) // 2
+            text_y = quit_button_rect[1] + (quit_button_rect[3] + text_height) // 2
+            cv2.imshow("Take picture of item", frame)
 
             key = cv2.waitKey(1) & 0xFF
 
             # If the spacebar is pressed, save the image and break the loop
-            if key == ord(" "):
+            if detect_quit_flags[0]:
                 # Generate a unique file name and save the image
                 file_name = f"{uuid.uuid4().hex}.png"
                 file_path = os.path.join(save_directory, file_name)
                 cv2.imwrite(file_path, frame)
                 break
             # If 'q' is pressed, exit without saving the image
-            elif key == ord("q"):
+            elif detect_quit_flags[1]:
                 file_path = None
                 break
 

@@ -1,5 +1,8 @@
 import cv2
 import numpy as np
+from gtts import gTTS
+import os
+import playsound
 
 def update_total_price(total_amount, target_amount):
     coin_values = {
@@ -69,6 +72,11 @@ def update_total_price(total_amount, target_amount):
                 continue
             
             frame_amount += coin_values[coin_type]
+            tts = gTTS(text=f"{coin_type} detected.", lang='en')
+            tts.save("coin.mp3")
+            playsound("coin.mp3")
+            # Remove the temporary speech file
+            os.remove("coin.mp3")
             cv2.circle(frame, (x, y), r, (0, 255, 0), 2)
 
         cv2.putText(frame, 'Current amount: ${:.2f}'.format(total_amount), (10, 30),
