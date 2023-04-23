@@ -117,8 +117,8 @@ def detect_cash(target_amount):
                         total_amount += cash_values[i]
                         print("Total amount: ${:.2f}".format(total_amount))
                         detected_objects.append({"box": current_box, "ttl": frames_to_live})
-                        spoken_bill_or_coin = f"{cash_values[i]} dollars"
-                        tts = gTTS(text=f"{spoken_bill_or_coin} detected.", lang='en')
+                        spoken_bill = "{} dollars detected.".format(cash_values[i])
+                        tts = gTTS(spoken_bill, lang='en')
                         tts.save("bill.mp3")
                         playsound("bill.mp3")
                         # Remove the temporary speech file
@@ -158,5 +158,3 @@ def detect_cash(target_amount):
     cv2.destroyAllWindows()
     return total_amount
 
-
-detect_cash(5)
