@@ -384,7 +384,7 @@ class CashRegisterApp(tk.Tk):
         self.buttons_frame.grid(row=0, column=0)
 
         # Create a canvas inside the frame
-        self.buttons_canvas = tk.Canvas(self.buttons_frame, height=230, width=675)
+        self.buttons_canvas = tk.Canvas(self.buttons_frame, height=230, width=650)
         self.buttons_canvas.grid(row=0, column=0)
 
         # Create a scrollbar for the canvas
