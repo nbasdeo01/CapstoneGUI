@@ -236,6 +236,7 @@ class CashRegisterApp(tk.Tk):
         while True:
             # Capture frame-by-frame
             ret, frame = cap.read()
+            original_frame = frame.copy()
 
             # Display the resulting frame
             cv2.rectangle(frame, (take_pic_rect[0], take_pic_rect[1]), (take_pic_rect[0] + take_pic_rect[2], take_pic_rect[1] + take_pic_rect[3]), (0, 255, 0), -1)
@@ -260,7 +261,7 @@ class CashRegisterApp(tk.Tk):
                 # Generate a unique file name and save the image
                 file_name = f"{uuid.uuid4().hex}.png"
                 file_path = os.path.join(save_directory, file_name)
-                cv2.imwrite(file_path, frame)
+                cv2.imwrite(file_path, original_frame)
                 break
             # If 'q' is pressed, exit without saving the image
             elif detect_quit_flags[1]:
