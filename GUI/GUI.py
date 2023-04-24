@@ -406,7 +406,7 @@ class CashRegisterApp(tk.Tk):
                 command=lambda price=item_price, name=item_name: self.add_item_price(price, name),
                 image=item_image,
                 compound="top",
-                width=190, height=200,
+                width=150, height=200,
             )
             button.image = item_image
             button.grid(row=i // 3, column=i % 3, padx=10, pady=10)
