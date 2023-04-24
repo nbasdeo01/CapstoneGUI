@@ -199,7 +199,7 @@ class CashRegisterApp(tk.Tk):
                 command=lambda price=item_price, name=item_name: self.add_item_price(price, name),
                 image=item_image,
                 compound="top",
-                width=170, height=200,
+                width=150, height=200,
             )
             button.image = item_image
             button.grid(row=(i // 3) + 1, column=i % 3, padx=10, pady=10)
@@ -467,7 +467,7 @@ class CashRegisterApp(tk.Tk):
 
     def create_remove_button(self):
         remove_label = tk.Label(self.cash_register_page, text="Tap an item in the cart\nto remove it", font=("Open Sans", 16), bg="#F5F5F5", fg="#333333")
-        remove_label.grid(row=2, column=3, padx=20, pady=0, sticky="n")
+        remove_label.grid(row=2, column=3, padx=0, pady=0, sticky="n")
         self.remove_button = tk.Button(self.cash_register_page, text="Remove Item", font=("Open Sans", 16), command=self.remove_item, bg="#FF5722", fg="#FFFFFF", relief="groove", borderwidth=2)
         self.remove_button.grid(row=3, column=3, padx=20, pady=(0, 10), ipadx=20, ipady=10, sticky="n")
 
