@@ -67,23 +67,27 @@ def update_total_price(total_amount, target_amount):
             r = int(keypoint.size / 2)
             coin_type = None
 
-            if 37 <= r < 41:
+            if 36 <= r < 39:
                 coin_type = 'dime'
-            elif 46 <= r < 49:
-                coin_type = 'nickel'
-            elif 50 <= r < 60:
+            #elif 45 <= r < 47:
+                #coin_type = 'nickel'
+            elif 50 <= r < 53:
                 coin_type = 'quarter'
-            elif 42 <= r < 48:
-                coin_type = 'penny'
+            #elif 41 <= r < 43:
+                #coin_type = 'penny'
             else:
                 continue
             
             frame_amount += coin_values[coin_type]
-            tts = gTTS(text=f"{coin_type} detected.", lang='en')
-            tts.save("coin.mp3")
-            playsound("coin.mp3")
+            #print(coin_type)
+            coin_name = str(coin_type)
+            print(coin_name)
+            #spoken_coin= f"{coin_name} detected."
+            #tts = gTTS(spoken_coin, lang='en')
+            #tts.save("change.mp3")
+            #playsound("change.mp3")
             # Remove the temporary speech file
-            os.remove("coin.mp3")
+            #os.remove("change.mp3")
             cv2.circle(frame, (x, y), r, (0, 255, 0), 2)
 
         cv2.putText(frame, 'Current amount: ${:.2f}'.format(total_amount), (10, 30),
@@ -116,3 +120,4 @@ def update_total_price(total_amount, target_amount):
     cv2.destroyAllWindows()
 
     return total_amount, frame_amount
+update_total_price(10, 20)
