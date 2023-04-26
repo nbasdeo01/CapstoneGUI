@@ -100,7 +100,7 @@ def detect_cash(target_amount):
                                 cash_values.append(0.01 if classes[class_id] == "coin_penny" else 0.05 if classes[class_id] == "coin_nickel" else 0.1 if classes[class_id] == "coin_dime" else 0.25)
 
             # Loop through each detected cash object and add its monetary value to the total amount
-                Sindices = []
+                indices = []
                 if len(cash_objects) > 0:
                     indices = cv2.dnn.NMSBoxes(cash_objects, [1.0]*len(cash_objects), 0.5, 0.5)
                 else: 
@@ -144,6 +144,8 @@ def detect_cash(target_amount):
                 # Display message when target amount is reached
                 cv2.putText(frame, "Target amount reached!", (10, 110), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
                 break
+            detect_quit_flags[0] = False
+        detect_quit_flags[1] = False   
         button_color = (200, 200, 200)
         text_color = (0, 0, 0)
         font = cv2.FONT_HERSHEY_TRIPLEX
@@ -163,8 +165,6 @@ def detect_cash(target_amount):
         cv2.putText(frame, "Total amount: ${:.2f}".format(total_amount), (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
         cv2.putText(frame, "Amount needed: ${:.2f}".format(target_amount - total_amount), (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
         #cv2.putText(frame, "Press 'd' to detect, 'q' to add coins", (10, 150), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
-        detect_quit_flags[0] = False
-        detect_quit_flags[1] = False
         # Display the frame
         cv2.imshow("Cash Detection", frame)
         key = cv2.waitKey(1) & 0xFF
