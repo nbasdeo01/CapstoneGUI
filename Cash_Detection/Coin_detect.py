@@ -81,4 +81,3 @@ def update_total_price(total_amount, target_amount):
     cv2.destroyAllWindows()
 
     return total_amount, frame_amount
-update_total_price(10,20)
