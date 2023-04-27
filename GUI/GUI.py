@@ -91,12 +91,12 @@ class CashRegisterApp(tk.Tk):
         #self.water_button.grid(row=0, column=0, padx=10, pady=10)
 
         # Total label and display
-        # self.total_label = tk.Label(self.cash_register_page, text="Total:", font=("Open Sans", 18), bg="#F5F5F5", fg="#333333")
-        # self.total_label.grid(row=3, column=0, padx=20, pady=20)
+        #self.total_label = tk.Label(self.cash_register_page, text="Total:", font=("Open Sans", 18), bg="#F5F5F5", fg="#333333")
+        #self.total_label.grid(row=3, column=0, padx=20, pady=20)
         self.total_var = tk.StringVar()
         self.total_var.set("0.00")
-        # self.total_display = tk.Label(self.cash_register_page, textvariable=self.total_var, font=("Open Sans", 16), width=10, bg="#FFFFFF", relief="groove", borderwidth=2)
-        # self.total_display.grid(row=3, column=1, padx=20, pady=20)
+        #self.total_display = tk.Label(self.cash_register_page, textvariable=self.total, font=("Open Sans", 16), width=10, bg="#FFFFFF", relief="groove", borderwidth=2)
+        #self.total_display.grid(row=3, column=1, padx=20, pady=20)
 
         parent_bg_color = self.cash_register_page.cget("bg")
 
