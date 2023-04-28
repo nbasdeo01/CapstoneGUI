@@ -35,9 +35,13 @@ class CashRegisterApp(tk.Tk):
         self.load_password()
         self.create_cart()
         self.create_remove_button()
+        self.current_user_password = None
         self.item_quantities = {}
         self.cash_register_page.grid_remove()
         self.admin_page.grid_remove()
+        self.rounded_total_var = tk.StringVar()
+        self.rounded_total_label = tk.Label(self.cash_register_page, textvariable=self.rounded_total_var, font=("Open Sans", 20))
+        self.rounded_total_label.grid(row=1, column=0, pady=10)
         # Center the application on the screen
         self.update_idletasks()
         screen_width = self.winfo_screenwidth()
@@ -87,12 +91,12 @@ class CashRegisterApp(tk.Tk):
         #self.water_button.grid(row=0, column=0, padx=10, pady=10)
 
         # Total label and display
-        # self.total_label = tk.Label(self.cash_register_page, text="Total:", font=("Open Sans", 18), bg="#F5F5F5", fg="#333333")
-        # self.total_label.grid(row=3, column=0, padx=20, pady=20)
+        #self.total_label = tk.Label(self.cash_register_page, text="Total:", font=("Open Sans", 18), bg="#F5F5F5", fg="#333333")
+        #self.total_label.grid(row=3, column=0, padx=20, pady=20)
         self.total_var = tk.StringVar()
         self.total_var.set("0.00")
-        # self.total_display = tk.Label(self.cash_register_page, textvariable=self.total_var, font=("Open Sans", 16), width=10, bg="#FFFFFF", relief="groove", borderwidth=2)
-        # self.total_display.grid(row=3, column=1, padx=20, pady=20)
+        #self.total_display = tk.Label(self.cash_register_page, textvariable=self.total, font=("Open Sans", 16), width=10, bg="#FFFFFF", relief="groove", borderwidth=2)
+        #self.total_display.grid(row=3, column=1, padx=20, pady=20)
 
         parent_bg_color = self.cash_register_page.cget("bg")
 
@@ -366,7 +370,7 @@ class CashRegisterApp(tk.Tk):
         self.items = []
         for name, price, image_path in cursor.fetchall():
             try:
-                item_image = ImageTk.PhotoImage(Image.open(image_path).resize((150, 150)))
+                item_image = ImageTk.PhotoImage(Image.open(image_path).resize((160, 160)))
             except Exception as e:
                 messagebox.showerror("Error", f"Cannot open image for item {name}: {e}")
                 continue
@@ -416,13 +420,6 @@ class CashRegisterApp(tk.Tk):
         self.inner_frame.update_idletasks()
         self.buttons_canvas.configure(scrollregion=self.buttons_canvas.bbox("all"))
 
-    def insert_transaction(self, transaction_data, total):
-        conn = sqlite3.connect("cash_register.db")
-        cursor = conn.cursor()
-        cursor.execute("INSERT INTO transactions (transaction_data, total, timestamp) VALUES (?, ?, ?)", (transaction_data, total, self.est_now()))
-        conn.commit()
-        conn.close()
-
     def show_transactions(self):
         self.cash_register_page.grid_remove()
         self.transactions_page.grid()
@@ -462,7 +459,7 @@ class CashRegisterApp(tk.Tk):
         self.add_passcode_page.grid_remove()
 
     def create_cart(self):
-        self.cart = tk.Listbox(self.cash_register_page, font=("Open Sans", 20), height=10, width=13)
+        self.cart = tk.Listbox(self.cash_register_page, font=("Open Sans", 20), height=10, width=15)
         self.cart.grid(row=0, column=3, rowspan=2, padx=20, pady=10, sticky="n")
 
     def create_remove_button(self):
@@ -481,36 +478,36 @@ class CashRegisterApp(tk.Tk):
             for item in cart_items:
                 item_name = item.split(" (")[0]  # Extract the item name from the item string
                 unique_items.add(item_name)
-        
+    
             for unique_item in unique_items:
                 speech += f"{unique_item}. Quantity {self.item_quantities[unique_item]}. "
-        
+    
             speech = speech[:-2] + ". "  # Remove the last comma and space, add a period
             # Round the total to 2 decimal places to avoid floating-point arithmetic issues
             rounded_total = round(self.total, 2)
             # Format the total as dollars and cents
             total_dollars, total_cents = divmod(int(rounded_total * 100), 100)
-            speech += f"The cart total is: {total_dollars} dollars and {total_cents} cents, "
+            rounded_total_speech = f"{total_dollars} dollars and {total_cents} cents"
+            rounded_total_text = f"${rounded_total:.2f}"
+            self.rounded_total_var.set(f"Cart Total: {rounded_total_text}")
+            speech += f"The cart total is: {rounded_total_speech}, "
         tts = gTTS(speech, lang='en')
         tts.save("cart_description.mp3")
         playsound("cart_description.mp3")
         os.remove("cart_description.mp3")
 
+
     def add_item_price(self, price, item_name):
         self.total += price
         self.total_var.set(f"${self.total:.2f}")
-
         # Update the item quantity in the cart
         if item_name not in self.item_quantities:
             self.item_quantities[item_name] = 0
         self.item_quantities[item_name] += 1
-
         self.cart.insert(tk.END, f"{item_name} (${price:.2f})")
-
         # Generate spoken text using gTTS
         tts_text = f"{item_name}. Quantity {self.item_quantities[item_name]}."
         tts = gTTS(tts_text, lang="en")
-
         # Save the audio file temporarily and play it
         with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_file:
             tts.save(temp_file.name)
@@ -520,9 +517,17 @@ class CashRegisterApp(tk.Tk):
         try:
             selected_item = self.cart.get(self.cart.curselection())
             item_price = float(selected_item.split("($")[-1].rstrip(")"))
+            item_name = selected_item.split(" (")[0]
             self.total -= item_price
             self.total_var.set(f"${self.total:.2f}")
             self.cart.delete(self.cart.curselection())
+
+            # Update item quantities
+            if self.item_quantities[item_name] > 1:
+                self.item_quantities[item_name] -= 1
+            else:
+                del self.item_quantities[item_name]
+
         except:
             messagebox.showerror("Error", "Please select an item to remove.")
 
@@ -582,21 +587,22 @@ class CashRegisterApp(tk.Tk):
         cursor.execute("CREATE TABLE IF NOT EXISTS passwords (name TEXT PRIMARY KEY, password TEXT)")
         cursor.execute("INSERT OR IGNORE INTO passwords (name, password) VALUES (?, ?)", ("User ID 1", self.correct_passcode1))
         cursor.execute("INSERT OR IGNORE INTO passwords (name, password) VALUES (?, ?)", ("User ID 2", self.correct_passcode2))
-        cursor.execute("CREATE TABLE IF NOT EXISTS transactions (id INTEGER PRIMARY KEY AUTOINCREMENT, transaction_data TEXT, total REAL, timestamp DATETIME DEFAULT (datetime('now', 'localtime')))")
+        cursor.execute("CREATE TABLE IF NOT EXISTS transactions (id TEXT PRIMARY KEY, transaction_data TEXT, total REAL, timestamp DATETIME DEFAULT (datetime('now', 'localtime')), FOREIGN KEY (id) REFERENCES passwords(password))")
         cursor.execute("CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE, price REAL NOT NULL, image_path TEXT NOT NULL, quantity INTEGER NOT NULL)")
         cursor.execute("CREATE VIEW IF NOT EXISTS items_ordered AS SELECT * FROM items ORDER BY name")
         conn.commit()
         conn.close()
+
 
     def est_now(self):
         utc_now = datetime.datetime.now(datetime.timezone.utc)
         est = pytz.timezone('US/Eastern')
         return utc_now.astimezone(est).strftime('%Y-%m-%d | %H:%M:%S')
 
-    def insert_transaction(self, transaction_data, total):
+    def insert_transaction(self, password, transaction_data, total):
         conn = sqlite3.connect("cash_register.db")
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO transactions (transaction_data, total, timestamp) VALUES (?, ?, ?)", (transaction_data, total, self.est_now()))
+        cursor.execute("INSERT INTO transactions (id, transaction_data, total, timestamp) VALUES (?, ?, ?, ?)", (password, transaction_data, total, self.est_now()))
         conn.commit()
         conn.close()
 
@@ -610,7 +616,7 @@ class CashRegisterApp(tk.Tk):
             print(f"Transaction data: {transaction_data}")
             print(f"Total: {self.total}")
             print(f"Timestamp: {self.est_now()}")
-            self.insert_transaction(transaction_data, self.total)
+            self.insert_transaction(self.current_user_password, transaction_data, self.total)
             self.clear_items()
         except subprocess.CalledProcessError as e:
             messagebox.showerror("Error", f"An error occurred while running main.py: {e}")
@@ -688,6 +694,7 @@ class CashRegisterApp(tk.Tk):
         if result is not None:
             self.passcode_page.grid_remove()
             self.cash_register_page.grid()
+            self.current_user_password = entered_passcode
             if entered_passcode == admin_password1:
                 self.admin = True
             elif entered_passcode == admin_password2:
@@ -856,20 +863,6 @@ class CashRegisterApp(tk.Tk):
                 self.delete_item_name_entry.delete(0, tk.END)
                 return
         messagebox.showerror("Error", "Item not found.")
-
-    def change_password(self):
-        new_password = self.new_password_entry.get()
-        confirm_new_password = self.confirm_new_password_entry.get()
-        if new_password == confirm_new_password:
-            self.correct_passcode = new_password
-            messagebox.showinfo("Success", "Password changed successfully.")
-            self.new_password_entry.delete(0, tk.END)
-            self.confirm_new_password_entry.delete(0, tk.END)
-            self.back_to_passcode_page()
-        else:
-            messagebox.showerror("Error", "Passwords do not match, please try again.")
-            self.new_password_entry.delete(0, tk.END)
-            self.confirm_new_password_entry.delete(0, tk.END)
 
     def logout(self):
         self.cash_register_page.grid_remove()

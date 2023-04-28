@@ -15,7 +15,7 @@ def detect_cash(target_amount):
     def on_mouse_click(event, x, y, flags, param):
         if event == cv2.EVENT_LBUTTONDOWN:
             if is_inside((x, y), detect_button_rect):
-                detect_quit_flags[0] = True
+                detect_quit_flags[0] = not detect_quit_flags[0]
             elif is_inside((x, y), quit_button_rect):
                 detect_quit_flags[1] = True
 
@@ -57,7 +57,9 @@ def detect_cash(target_amount):
     buttons_y = screen_height - button_height - 20
     detect_button_rect = ((screen_width - button_width * 2 - button_spacing) // 2, buttons_y, button_width, button_height)
     quit_button_rect = (detect_button_rect[0] + button_width + button_spacing, buttons_y, button_width, button_height)
-    
+    detect_pressed = False
+    detect_ready = True
+
     while True:
         # Check for keypress
         ret, frame = cap.read()
@@ -67,7 +69,9 @@ def detect_cash(target_amount):
             break
 
         # If "d" key is pressed, process a single frame
-        elif detect_quit_flags[0]:
+        elif (detect_quit_flags[0] or detect_pressed) and detect_ready:
+            detect_pressed = False
+            detect_ready = False
             detection_running = True
             target_reached = False
             ret, frame = cap.read()
@@ -144,7 +148,7 @@ def detect_cash(target_amount):
                 # Display message when target amount is reached
                 cv2.putText(frame, "Target amount reached!", (10, 110), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
                 break
-            detect_quit_flags[0] = False
+            
         detect_quit_flags[1] = False   
         button_color = (200, 200, 200)
         text_color = (0, 0, 0)
@@ -167,9 +171,10 @@ def detect_cash(target_amount):
         #cv2.putText(frame, "Press 'd' to detect, 'q' to add coins", (10, 150), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
         # Display the frame
         cv2.imshow("Cash Detection", frame)
+        if not detect_quit_flags[0]:
+            detect_ready = True
         key = cv2.waitKey(1) & 0xFF
     # Release the camera and close all windows
     cap.release()
     cv2.destroyAllWindows()
     return total_amount
-
