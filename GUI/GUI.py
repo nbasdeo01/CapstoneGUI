@@ -406,11 +406,11 @@ class CashRegisterApp(tk.Tk):
             button = tk.Button(
                 self.inner_frame,
                 text=f"{item_name}\n${item_price:.2f}",
-                font=("Open Sans", 20),
+                font=("Open Sans", 17),
                 command=lambda price=item_price, name=item_name: self.add_item_price(price, name),
                 image=item_image,
                 compound="top",
-                width=150, height=200,
+                width=180, height=200,
             )
             button.image = item_image
             button.grid(row=i // 3, column=i % 3, padx=10, pady=10)
@@ -467,35 +467,32 @@ class CashRegisterApp(tk.Tk):
         remove_label.grid(row=2, column=3, padx=0, pady=0, sticky="n")
         self.remove_button = tk.Button(self.cash_register_page, text="Remove Item", font=("Open Sans", 16), command=self.remove_item, bg="#FF5722", fg="#FFFFFF", relief="groove", borderwidth=2)
         self.remove_button.grid(row=3, column=3, padx=20, pady=(0, 10), ipadx=20, ipady=10, sticky="n")
-
+        
     def read_cart_description(self):
         cart_items = self.cart.get(0, 'end')
         if len(cart_items) == 0:
             speech = "The cart is currently empty."
         else:
-            speech = "The cart contains: "
-            unique_items = set()
-            for item in cart_items:
-                item_name = item.split(" (")[0]  # Extract the item name from the item string
-                unique_items.add(item_name)
-    
-            for unique_item in unique_items:
-                speech += f"{unique_item}. Quantity {self.item_quantities[unique_item]}. "
-    
-            speech = speech[:-2] + ". "  # Remove the last comma and space, add a period
             # Round the total to 2 decimal places to avoid floating-point arithmetic issues
             rounded_total = round(self.total, 2)
             # Format the total as dollars and cents
             total_dollars, total_cents = divmod(int(rounded_total * 100), 100)
             rounded_total_speech = f"{total_dollars} dollars and {total_cents} cents"
             rounded_total_text = f"${rounded_total:.2f}"
-            self.rounded_total_var.set(f"Cart Total: {rounded_total_text}")
+            self.rounded_total_var.set(f"Cart Total: {rounded_total_text}")  # Update the total on the screen
+            speech = "The cart contains: "
+            unique_items = set()
+            for item in cart_items:
+                item_name = item.split(" (")[0]  # Extract the item name from the item string
+                unique_items.add(item_name)
+            for unique_item in unique_items:
+                speech += f"{unique_item}. Quantity {self.item_quantities[unique_item]}. "
+            speech = speech[:-2] + ". "  # Remove the last comma and space, add a period
             speech += f"The cart total is: {rounded_total_speech}, "
         tts = gTTS(speech, lang='en')
         tts.save("cart_description.mp3")
         playsound("cart_description.mp3")
         os.remove("cart_description.mp3")
-
 
     def add_item_price(self, price, item_name):
         self.total += price
@@ -592,7 +589,6 @@ class CashRegisterApp(tk.Tk):
         cursor.execute("CREATE VIEW IF NOT EXISTS items_ordered AS SELECT * FROM items ORDER BY name")
         conn.commit()
         conn.close()
-
 
     def est_now(self):
         utc_now = datetime.datetime.now(datetime.timezone.utc)
@@ -788,7 +784,6 @@ class CashRegisterApp(tk.Tk):
             item_name, item_price, item_quantity = item  # Add the item_quantity variable here
             self.item_listbox.insert(tk.END, f"{item_name} - ${item_price:.2f} - Quantity: {item_quantity}")  # Show the quantity
 
-
     def update_item_buttons(self):
         self.populate_item_listbox()
         self.item_buttons_frame.grid_forget()
@@ -830,39 +825,6 @@ class CashRegisterApp(tk.Tk):
         self.new_item_name_entry.delete(0, tk.END)
         self.new_item_price_entry.delete(0, tk.END)
         self.new_item_quantity_entry.delete(0, tk.END)  # Clear the quantity input field
-
-    def edit_item(self):
-        old_item_name = self.edit_item_name_entry.get()
-        new_item_name = self.new_edit_item_name_entry.get()
-        new_item_price = float(self.new_edit_item_price_entry.get())
-        # Find the item in the list
-        for i, item in enumerate(self.items):
-            if item[0] == old_item_name:
-                # Update the item
-                self.items[i] = (new_item_name, new_item_price)
-                # Update item buttons
-                self.update_item_buttons()
-                # Clear the input fields
-                self.edit_item_name_entry.delete(0, tk.END)
-                self.new_edit_item_name_entry.delete(0, tk.END)
-                self.new_edit_item_price_entry.delete(0, tk.END)
-                return
-        messagebox.showerror("Error", "Item not found.")
-        self.populate_item_listbox()
-
-    def delete_item(self):
-        item_name = self.delete_item_name_entry.get()
-        # Find the item in the list
-        for i, item in enumerate(self.items):
-            if item[0].strip() == item_name.strip():
-                # Remove the item from the list
-                self.items.pop(i)
-                # Update item buttons
-                self.update_item_buttons()
-                # Clear the input field
-                self.delete_item_name_entry.delete(0, tk.END)
-                return
-        messagebox.showerror("Error", "Item not found.")
 
     def logout(self):
         self.cash_register_page.grid_remove()
