@@ -1,3 +1,6 @@
+import sys 
+sys.path.append('/Users/nicholasbasdeo/CapstoneGUI/Cash_Detection/yolov5')
+
 import cv2
 import numpy as np
 import os
@@ -5,10 +8,10 @@ from gtts import gTTS
 from playsound import playsound
 import torch
 from yolov5.models.experimental import attempt_load
-from yolov5.utils.datasets import LoadImages, LoadStreams
-from yolov5.utils.general import check_img_size, non_max_suppression, scale_coords
-from yolov5.utils.torch_utils import select_device, time_synchronized
+from yolov5.utils.general import check_img_size, non_max_suppression, scale_boxes
+from yolov5.utils.torch_utils import select_device
 import torch.nn.functional as F
+
 
 def detect_cash(target_amount):
     def is_inside(pos, rect):
@@ -68,19 +71,19 @@ def detect_cash(target_amount):
     # Load YOLOv5s network
     device = select_device()
     half = device.type != 'cpu'
-    model = attempt_load('/home/jetson/CapstoneGUI/Cash_Detection/best.pt', map_location=device)  # Update the path to the YOLOv5s weights
+    model = attempt_load('/Users/nicholasbasdeo/CapstoneGUI/Cash_Detection/best.pt').to(device)  # Update the path to the YOLOv5s weights
     imgsz = check_img_size(640, s=model.stride.max())
     if half:
         model.half()
 
-    with open("/home/jetson/CapstoneGUI/Cash_Detection/classes.yaml") as f:
+    with open("/Users/nicholasbasdeo/CapstoneGUI/Cash_Detection/classes.yaml") as f:
         classes = [line.strip() for line in f.readlines()]
 
     # Initialize variables
     total_amount = 0
     detected_objects = []
-    #cap = cv2.VideoCapture(0)
-    cap = cv2.VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM),format=NV12,width=640,height=480,framerate=30/1 ! nvvidconv ! video/x-raw,format=BGRx ! videoconvert ! video/x-raw,format=BGR ! appsink drop=1", cv2.CAP_GSTREAMER)
+    cap = cv2.VideoCapture(0)
+    #cap = cv2.VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM),format=NV12,width=640,height=480,framerate=30/1 ! nvvidconv ! video/x-raw,format=BGRx ! videoconvert ! video/x-raw,format=BGR ! appsink drop=1", cv2.CAP_GSTREAMER)
     frames_to_live = 30
     target_reached = False
     button_width = 150
@@ -112,7 +115,7 @@ def detect_cash(target_amount):
                 img_tensor = torch.from_numpy(frame_rgb).to(device).float()
                 img_tensor = img_tensor.permute(2, 0, 1).unsqueeze(0)
                 img_tensor /= 255.0  # Normalize pixel values to the range [0, 1]
-                if imgsz != model.img_size:
+                if imgsz != model.stride.max():
                     img_tensor = F.interpolate(img_tensor, size=imgsz, mode='bilinear', align_corners=False)
 
                 # Feed the tensor into the neural network and get the output predictions
@@ -127,7 +130,7 @@ def detect_cash(target_amount):
                 # Loop through each output layer and detect cash objects
                 for i, det in enumerate(pred):  # Loop through detections
                     if len(det):
-                        det[:, :4] = scale_coords(img_tensor.shape[2:], det[:, :4], frame_rgb.shape).round()
+                        det[:, :4] = scale_boxes(img_tensor.shape[2:], det[:, :4], frame_rgb.shape).round()
                         for *xyxy, conf, cls in reversed(det):
                             # Process each detection here
                             x1, y1, x2, y2 = [int(x.item()) for x in xyxy]  # Extract the bounding box coordinates
@@ -214,3 +217,4 @@ def detect_cash(target_amount):
     cap.release()
     cv2.destroyAllWindows()
     return total_amount
+detect_cash(10)
