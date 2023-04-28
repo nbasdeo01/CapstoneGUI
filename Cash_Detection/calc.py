@@ -83,6 +83,11 @@ def calculate_change(current_amount, target_amount):
         tts.save("change.mp3")
         playsound("change.mp3")
         os.remove("change.mp3")
+        reminder_text = "Put money in register."
+        tts2 = gTTS(reminder_text, lang="en")
+        tts2.save("reminder.mp3")
+        playsound("reminder.mp3")
+        os.remove("reminder.mp3")
     return change_dict
 
 def main():
