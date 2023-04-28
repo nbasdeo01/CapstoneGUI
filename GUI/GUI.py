@@ -27,6 +27,9 @@ class CashRegisterApp(tk.Tk):
         self.user_password = tk.StringVar()
         self.admin_page = tk.Frame(self)
         self.passcode_page = tk.Frame(self)
+        self.total = 0.0
+        self.total_var = tk.StringVar()
+        self.rounded_total_var = tk.StringVar()
         self.create_database()
         self.create_add_passcode_page()
         self.create_passcode_page()
@@ -92,11 +95,11 @@ class CashRegisterApp(tk.Tk):
 
         # Total label and display
         #self.total_label = tk.Label(self.cash_register_page, text="Total:", font=("Open Sans", 18), bg="#F5F5F5", fg="#333333")
-        #self.total_label.grid(row=3, column=0, padx=20, pady=20)
-        self.total_var = tk.StringVar()
-        self.total_var.set("0.00")
+        #self.total_label.grid(row=1, column=0, padx=20, pady=20)
+        #self.total_var = tk.StringVar()
+        #self.total_var.set("0.00")
         #self.total_display = tk.Label(self.cash_register_page, textvariable=self.total, font=("Open Sans", 16), width=10, bg="#FFFFFF", relief="groove", borderwidth=2)
-        #self.total_display.grid(row=3, column=1, padx=20, pady=20)
+        #self.total_display.grid(row=1, column=1, padx=20, pady=20)
 
         parent_bg_color = self.cash_register_page.cget("bg")
 
@@ -363,6 +366,11 @@ class CashRegisterApp(tk.Tk):
             messagebox.showinfo("User Deleted", f"User '{user_name}' has been deleted")
         conn.close()
 
+    def update_total(self):
+        rounded_total = round(self.total, 2)
+        rounded_total_text = f"${rounded_total:.2f}"
+        self.rounded_total_var.set(f"Cart Total: {rounded_total_text}")
+
     def update_items(self):
         conn = sqlite3.connect("cash_register.db")
         cursor = conn.cursor()
@@ -410,7 +418,7 @@ class CashRegisterApp(tk.Tk):
                 command=lambda price=item_price, name=item_name: self.add_item_price(price, name),
                 image=item_image,
                 compound="top",
-                width=150, height=200,
+                width=160, height=200,
             )
             button.image = item_image
             button.grid(row=i // 3, column=i % 3, padx=10, pady=10)
@@ -479,7 +487,7 @@ class CashRegisterApp(tk.Tk):
             total_dollars, total_cents = divmod(int(rounded_total * 100), 100)
             rounded_total_speech = f"{total_dollars} dollars and {total_cents} cents"
             rounded_total_text = f"${rounded_total:.2f}"
-            self.rounded_total_var.set(f"Cart Total: {rounded_total_text}")  # Update the total on the screen
+            #self.rounded_total_var.set(f"Cart Total: {rounded_total_text}")  # Update the total on the screen
             speech = "The cart contains: "
             unique_items = set()
             for item in cart_items:
@@ -509,6 +517,7 @@ class CashRegisterApp(tk.Tk):
         with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_file:
             tts.save(temp_file.name)
             playsound(temp_file.name)
+        self.update_total()  # Call update_total method here
 
     def remove_item(self):
         try:
@@ -657,6 +666,7 @@ class CashRegisterApp(tk.Tk):
             self.total = 0.0
             self.total_var.set(f"${self.total:.2f}")
             self.item_quantities = {}  # Clear the item quantities dictionary
+            self.update_total()
 
     def toggle_add_item_button(self, show=True):
         if show:
